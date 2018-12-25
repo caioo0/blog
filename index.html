@@ -2,15 +2,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
   
 
 
@@ -30,6 +21,10 @@
 
 
 
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
 
 
 
@@ -54,34 +49,34 @@
 
 <link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
 
-<link href="css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+<link href="css/main.css?v=6.0.6" rel="stylesheet" type="text/css">
 
 
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.6.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.6">
 
 
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.6.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.6">
 
 
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.6.0">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.6">
 
 
-  <link rel="mask-icon" href="/images/logo.svg?v=6.6.0" color="#222">
-
-
-
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.6" color="#222">
 
 
 
 
 
 
-<script id="hexo.configurations">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
   var NexT = window.NexT || {};
   var CONFIG = {
     root: '/',
     scheme: 'Muse',
-    version: '6.6.0',
+    version: '6.0.6',
     sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
     fancybox: false,
     fastclick: false,
@@ -124,7 +119,7 @@
 
 
 
-<script id="page.configurations">
+<script type="text/javascript" id="page.configurations">
   CONFIG.page = {
     sidebar: "",
   };
@@ -141,11 +136,8 @@
 
 
 
-
-
-
   <noscript>
-  <style>
+  <style type="text/css">
     .use-motion .motion-element,
     .use-motion .brand,
     .use-motion .menu-item,
@@ -164,8 +156,10 @@
       top: initial;
     }
 
-    .use-motion .logo-line-before i { left: initial; }
-    .use-motion .logo-line-after i { right: initial; }
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
   </style>
 </noscript><!-- hexo-inject:begin --><!-- hexo-inject:end -->
 
@@ -183,8 +177,10 @@
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-brand-wrapper">
-  <div class="site-meta">
+      <div class="header-inner"> 
+
+<div class="site-brand-wrapper">
+  <div class="site-meta ">
     
 
     <div class="custom-logo-site-title">
@@ -194,12 +190,9 @@
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
-    
       
         <p class="site-subtitle">Live AI</p>
       
-    
-    
   </div>
 
   <div class="site-nav-toggle">
@@ -211,48 +204,31 @@
   </div>
 </div>
 
-
-
 <nav class="site-nav">
+  
+
   
     <ul id="menu" class="menu">
       
         
         
-        
           
-          <li class="menu-item menu-item-home">
+  <li class="menu-item menu-item-home">
+    <a href="" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+</li>
 
-    
-    
-    
       
-    
-
-    
-
-    <a rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Startseite</a>
-
-  </li>
-        
         
         
           
-          <li class="menu-item menu-item-archives">
-
-    
-    
-    
-      
-    
-
-    
-
-    <a rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archiv</a>
-
-  </li>
+  <li class="menu-item menu-item-archives">
+    <a href="" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+</li>
 
       
+
       
     </ul>
   
@@ -260,18 +236,30 @@
   
     
 
+    
+    
+      
+      
+    
+      
+      
+    
+    
+
+  
+
+
   
 
   
 </nav>
 
 
-
   
 
 
 
-</div>
+ </div>
     </header>
 
     
@@ -304,8 +292,8 @@
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Jo Choi">
-      <meta itemprop="description" content="时光不语  静待花开">
-      <meta itemprop="image" content="images/avatar.gif">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1544796448457&di=de6ca0884fd0f74b7d691576231b193f&imgtype=0&src=http%3A%2F%2Fimgtu.5011.net%2Fuploads%2Fcontent%2F20170303%2F7795981488530133.jpg">
     </span>
 
     <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
@@ -319,51 +307,24 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                
-                <a href="hello-world/" class="post-title-link" itemprop="url">实现一个简单的推荐系统</a>
-              
-            
-          </h1>
+                <a class="post-title-link" href="hello-world/" itemprop="url">实现一个简单的推荐系统</a></h1>
         
 
         <div class="post-meta">
           <span class="post-time">
-
-            
-            
-            
-
             
               <span class="post-meta-item-icon">
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
-
-              
-                
-              
-
-              <time title="Post created: 2018-11-16 14:39:32" itemprop="dateCreated datePublished" datetime="2018-11-16T14:39:32+08:00">2018-11-16</time>
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-11-16T14:39:32+08:00">2018-11-16</time>
             
 
             
-              
+            
 
-              
-                
-                <span class="post-meta-divider">|</span>
-                
-
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">Edited on</span>
-                
-                <time title="Updated at: 2018-12-08 12:01:47" itemprop="dateModified" datetime="2018-12-08T12:01:47+08:00">2018-12-08</time>
-              
             
           </span>
 
@@ -398,16 +359,14 @@
         
           
           假设我们现在要为一个在线音乐网站的用户推荐乐队。用户可以用1至5星来评价一个乐队，其中包含半星（如2.5星）。下表展示了8位用户对8支乐队的评价：
-表中的短横表示这位用户没有给这支乐队打分。我们在计算
+表中的短横表示这位用户没有给这支乐队打分。我们在计算两个用户的距离时，只采用他们都评价过的乐队，比如要计算Angelica和Bill的距离，我们只会用到
           ...
           <!--noindex-->
-          
-            <div class="post-button text-center">
-              <a class="btn" href="hello-world/#more" rel="contents">
-                Weiterlesen &raquo;
-              </a>
-            </div>
-          
+          <div class="post-button text-center">
+            <a class="btn" href="hello-world/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
           <!--/noindex-->
         
       
@@ -421,9 +380,6 @@
 
     
 
-    
-      
-    
     
 
     
@@ -467,8 +423,8 @@
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Jo Choi">
-      <meta itemprop="description" content="时光不语  静待花开">
-      <meta itemprop="image" content="images/avatar.gif">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1544796448457&di=de6ca0884fd0f74b7d691576231b193f&imgtype=0&src=http%3A%2F%2Fimgtu.5011.net%2Fuploads%2Fcontent%2F20170303%2F7795981488530133.jpg">
     </span>
 
     <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
@@ -482,39 +438,24 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                
-                <a href="安装hexo-admin管理你的文章-1/" class="post-title-link" itemprop="url">使用hexo-admin管理你的文章</a>
-              
-            
-          </h1>
+                <a class="post-title-link" href="安装hexo-admin管理你的文章-1/" itemprop="url">使用hexo-admin管理你的文章</a></h1>
         
 
         <div class="post-meta">
           <span class="post-time">
-
-            
-            
-            
-
             
               <span class="post-meta-item-icon">
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
-
-              
-                
-              
-
-              <time title="Post created: 2018-11-16 14:33:04 / Updated at: 14:39:17" itemprop="dateCreated datePublished" datetime="2018-11-16T14:33:04+08:00">2018-11-16</time>
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-11-16T14:33:04+08:00">2018-11-16</time>
             
 
             
-              
+            
 
-              
             
           </span>
 
@@ -548,16 +489,14 @@
       
         
           
-          概要如果自己编辑 MD 文件的话，确实比较麻烦，你可以用一些 MD 的编辑器，但是在管理 MD 文件上还是操作不方便。这里推荐使用 hexo-admin，而且编辑完之后可以马上看到效果呢。需要说明的是
+          概要如果自己编辑 MD 文件的话，确实比较麻烦，你可以用一些 MD 的编辑器，但是在管理 MD 文件上还是操作不方便。这里推荐使用 hexo-admin，而且编辑完之后可以马上看到效果呢。需要说明的是，hexo-admin 管理是本地用的，就是你需要在本地编辑完之后再上传到 github，而不能直接
           ...
           <!--noindex-->
-          
-            <div class="post-button text-center">
-              <a class="btn" href="安装hexo-admin管理你的文章-1/#more" rel="contents">
-                Weiterlesen &raquo;
-              </a>
-            </div>
-          
+          <div class="post-button text-center">
+            <a class="btn" href="安装hexo-admin管理你的文章-1/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
           <!--/noindex-->
         
       
@@ -571,9 +510,6 @@
 
     
 
-    
-      
-    
     
 
     
@@ -626,9 +562,11 @@
 
       
 
-      <div class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1544796448457&di=de6ca0884fd0f74b7d691576231b193f&imgtype=0&src=http%3A%2F%2Fimgtu.5011.net%2Fuploads%2Fcontent%2F20170303%2F7795981488530133.jpg" alt="Jo Choi">
             
               <p class="site-author-name" itemprop="name">Jo Choi</p>
               <p class="site-description motion-element" itemprop="description">时光不语  静待花开</p>
@@ -642,7 +580,7 @@
                   <a href="/archives/">
                 
                     <span class="site-state-item-count">2</span>
-                    <span class="site-state-item-name">Artikel</span>
+                    <span class="site-state-item-name">posts</span>
                   </a>
                 </div>
               
@@ -658,6 +596,7 @@
           
 
           
+          
 
           
           
@@ -668,7 +607,7 @@
           
 
         </div>
-      </div>
+      </section>
 
       
 
@@ -685,7 +624,7 @@
     <footer id="footer" class="footer">
       <div class="footer-inner">
         <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
-  <span class="with-love" id="animate">
+  <span class="with-love">
     <i class="fa fa-user"></i>
   </span>
   <span class="author" itemprop="copyrightHolder">Jo Choi</span>
@@ -696,7 +635,9 @@
 </div>
 
 
-  <div class="powered-by">Erstellt mit  <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.8.0</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 
@@ -704,7 +645,7 @@
 
 
 
-  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v6.6.0</div>
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Muse</a> v6.0.6</div>
 
 
 
@@ -731,14 +672,11 @@
 
     
 
-    
-
-    
   </div>
 
   
 
-<script>
+<script type="text/javascript">
   if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
     window.Promise = null;
   }
@@ -771,42 +709,38 @@
 
   
   
-    <script src="lib/jquery/index.js?v=2.1.3"></script>
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
   
 
   
   
-    <script src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
   
 
   
   
-    <script src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
   
 
 
   
 
 
-  <script src="js/src/utils.js?v=6.6.0"></script>
+  <script type="text/javascript" src="js/src/utils.js?v=6.0.6"></script>
 
-  <script src="js/src/motion.js?v=6.6.0"></script>
-
-
-
-  
-  
-
-  
-
-  
-
-
-  <script src="js/src/bootstrap.js?v=6.6.0"></script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+  <script type="text/javascript" src="js/src/motion.js?v=6.0.6"></script>
 
 
 
   
+  
+
+  
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=6.0.6"></script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
 
 
 
@@ -814,9 +748,7 @@
 
 
 
-
-
-
+	
 
 
 
@@ -830,21 +762,30 @@
 
   
 
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
   
 
   
 
   
 
-
-
   
 
   
-  
-
-  
-
   
 
   

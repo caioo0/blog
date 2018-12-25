@@ -2,15 +2,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
   
 
 
@@ -30,6 +21,10 @@
 
 
 
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
 
 
 
@@ -54,34 +49,34 @@
 
 <link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
 
-<link href="css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+<link href="css/main.css?v=6.0.6" rel="stylesheet" type="text/css">
 
 
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.6.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.6">
 
 
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.6.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.6">
 
 
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.6.0">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.6">
 
 
-  <link rel="mask-icon" href="/images/logo.svg?v=6.6.0" color="#222">
-
-
-
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.6" color="#222">
 
 
 
 
 
 
-<script id="hexo.configurations">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
   var NexT = window.NexT || {};
   var CONFIG = {
     root: '/',
     scheme: 'Muse',
-    version: '6.6.0',
+    version: '6.0.6',
     sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
     fancybox: false,
     fastclick: false,
@@ -124,13 +119,13 @@
 
 
 
-<script id="page.configurations">
+<script type="text/javascript" id="page.configurations">
   CONFIG.page = {
     sidebar: "",
   };
 </script>
 
-  <title>Archiv | JoChoi's Blog</title>
+  <title>Archive | JoChoi's Blog</title>
   
 
 
@@ -141,11 +136,8 @@
 
 
 
-
-
-
   <noscript>
-  <style>
+  <style type="text/css">
     .use-motion .motion-element,
     .use-motion .brand,
     .use-motion .menu-item,
@@ -164,8 +156,10 @@
       top: initial;
     }
 
-    .use-motion .logo-line-before i { left: initial; }
-    .use-motion .logo-line-after i { right: initial; }
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
   </style>
 </noscript><!-- hexo-inject:begin --><!-- hexo-inject:end -->
 
@@ -182,8 +176,10 @@
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-brand-wrapper">
-  <div class="site-meta">
+      <div class="header-inner"> 
+
+<div class="site-brand-wrapper">
+  <div class="site-meta ">
     
 
     <div class="custom-logo-site-title">
@@ -193,12 +189,9 @@
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
-    
       
         <p class="site-subtitle">Live AI</p>
       
-    
-    
   </div>
 
   <div class="site-nav-toggle">
@@ -210,48 +203,31 @@
   </div>
 </div>
 
-
-
 <nav class="site-nav">
+  
+
   
     <ul id="menu" class="menu">
       
         
         
-        
           
-          <li class="menu-item menu-item-home">
+  <li class="menu-item menu-item-home">
+    <a href="" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+</li>
 
-    
-    
-    
       
-    
-
-    
-
-    <a rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Startseite</a>
-
-  </li>
-        
         
         
           
-          <li class="menu-item menu-item-archives menu-item-active">
-
-    
-    
-    
-      
-    
-
-    
-
-    <a rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archiv</a>
-
-  </li>
+  <li class="menu-item menu-item-archives">
+    <a href="" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+</li>
 
       
+
       
     </ul>
   
@@ -278,12 +254,11 @@
 </nav>
 
 
-
   
 
 
 
-</div>
+ </div>
     </header>
 
     
@@ -310,7 +285,7 @@
         
           
         
-        Öhm..! Insgesamt 2 Artikel. Bleib dran.
+        Um..! 2 posts in total. Keep on posting.
       </span>
       
 
@@ -424,9 +399,11 @@
 
       
 
-      <div class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1544796448457&di=de6ca0884fd0f74b7d691576231b193f&imgtype=0&src=http%3A%2F%2Fimgtu.5011.net%2Fuploads%2Fcontent%2F20170303%2F7795981488530133.jpg" alt="Jo Choi">
             
               <p class="site-author-name" itemprop="name">Jo Choi</p>
               <p class="site-description motion-element" itemprop="description">时光不语  静待花开</p>
@@ -440,7 +417,7 @@
                   <a href="../../archives/">
                 
                     <span class="site-state-item-count">2</span>
-                    <span class="site-state-item-name">Artikel</span>
+                    <span class="site-state-item-name">posts</span>
                   </a>
                 </div>
               
@@ -456,6 +433,7 @@
           
 
           
+          
 
           
           
@@ -466,7 +444,7 @@
           
 
         </div>
-      </div>
+      </section>
 
       
 
@@ -483,7 +461,7 @@
     <footer id="footer" class="footer">
       <div class="footer-inner">
         <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
-  <span class="with-love" id="animate">
+  <span class="with-love">
     <i class="fa fa-user"></i>
   </span>
   <span class="author" itemprop="copyrightHolder">Jo Choi</span>
@@ -494,7 +472,9 @@
 </div>
 
 
-  <div class="powered-by">Erstellt mit  <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.8.0</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 
@@ -502,7 +482,7 @@
 
 
 
-  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v6.6.0</div>
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Muse</a> v6.0.6</div>
 
 
 
@@ -529,14 +509,11 @@
 
     
 
-    
-
-    
   </div>
 
   
 
-<script>
+<script type="text/javascript">
   if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
     window.Promise = null;
   }
@@ -569,42 +546,38 @@
 
   
   
-    <script src="../../lib/jquery/index.js?v=2.1.3"></script>
+    <script type="text/javascript" src="../../lib/jquery/index.js?v=2.1.3"></script>
   
 
   
   
-    <script src="../../lib/velocity/velocity.min.js?v=1.2.1"></script>
+    <script type="text/javascript" src="../../lib/velocity/velocity.min.js?v=1.2.1"></script>
   
 
   
   
-    <script src="../../lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+    <script type="text/javascript" src="../../lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
   
 
 
   
 
 
-  <script src="../../js/src/utils.js?v=6.6.0"></script>
+  <script type="text/javascript" src="../../js/src/utils.js?v=6.0.6"></script>
 
-  <script src="../../js/src/motion.js?v=6.6.0"></script>
-
-
-
-  
-  
-
-  
-
-  
-
-
-  <script src="../../js/src/bootstrap.js?v=6.6.0"></script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+  <script type="text/javascript" src="../../js/src/motion.js?v=6.0.6"></script>
 
 
 
   
+  
+
+  
+
+  
+
+
+  <script type="text/javascript" src="../../js/src/bootstrap.js?v=6.0.6"></script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
 
 
 
@@ -612,9 +585,7 @@
 
 
 
-
-
-
+	
 
 
 
@@ -628,21 +599,30 @@
 
   
 
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
   
 
   
 
   
 
-
-
   
 
   
-  
-
-  
-
   
 
   
