@@ -3,6 +3,12 @@
   <entry>
     <title><![CDATA[实现一个简单的推荐系统]]></title>
     <url>%2F2018%2F11%2F16%2Fhello-world%2F</url>
-    <content type="text"><![CDATA[title: 实现一个简单的推荐系统 categories: 机器学习 假设我们现在要为一个在线音乐网站的用户推荐乐队。用户可以用1至5星来评价一个乐队，其中包含半星（如2.5星）。下表展示了8位用户对8支乐队的评价： 表中的短横表示这位用户没有给这支乐队打分。我们在计算两个用户的距离时，只采用他们都评价过的乐队，比如要计算Angelica和Bill的距离，我们只会用到5支乐队。这两个用户的曼哈顿距离为： 最后距离即是上方数据的加和：(1.5 + 1.5 + 3 + 2 + 1)。计算欧几里得距离的方法也是类似的，我们也只取双方都评价过的乐队。 用公式来描述即： 掌握了吗？ 那就试试计算其他几个用户之间的距离吧。 \begin{align}x &amp;= a +b+c+d\ &amp;= e +f\ &amp;= g\end{align} $$ 表示整行公式： $$\sum_{i=1}^n a_i=0$$ $$f(x_1,x_x,\ldots,x_n) = x_1^2 + x_2^2 + \cdots + x_n^2 $$ $$\sum^{j-1}{k=0}{\widehat{\gamma}{kj} z_k}$$ 访问 MathJax 参考更多使用方法。 1$ sudo apt-get install vim-gnome Python 示例： 123456789101112@requires_authorizationdef somefunc(param1='', param2=0): '''A docstring''' if param1 &gt; param2: # interesting print 'Greater' return (param2 - param1 + 1) or Noneclass SomeClass: pass&gt;&gt;&gt; message = '''interpreter... prompt''']]></content>
+    <content type="text"><![CDATA[假设我们现在要为一个在线音乐网站的用户推荐乐队。用户可以用1至5星来评价一个乐队，其中包含半星（如2.5星）。下表展示了8位用户对8支乐队的评价： 表中的短横表示这位用户没有给这支乐队打分。我们在计算两个用户的距离时，只采用他们都评价过的乐队，比如要计算Angelica和Bill的距离，我们只会用到5支乐队。这两个用户的曼哈顿距离为： 最后距离即是上方数据的加和：(1.5 + 1.5 + 3 + 2 + 1)。计算欧几里得距离的方法也是类似的，我们也只取双方都评价过的乐队。 用公式来描述即： 掌握了吗？ 那就试试计算其他几个用户之间的距离吧。 \begin{align}x &amp;= a +b+c+d\ &amp;= e +f\ &amp;= g\end{align} $$ 表示整行公式： $$\sum_{i=1}^n a_i=0$$ $$f(x_1,x_x,\ldots,x_n) = x_1^2 + x_2^2 + \cdots + x_n^2 $$ $$\sum^{j-1}{k=0}{\widehat{\gamma}{kj} z_k}$$ 访问 MathJax 参考更多使用方法。 1$ sudo apt-get install vim-gnome Python 示例： 123456789101112@requires_authorizationdef somefunc(param1='', param2=0): '''A docstring''' if param1 &gt; param2: # interesting print 'Greater' return (param2 - param1 + 1) or Noneclass SomeClass: pass&gt;&gt;&gt; message = '''interpreter... prompt''']]></content>
+      <categories>
+        <category>机器学习</category>
+      </categories>
+      <tags>
+        <tag>推荐</tag>
+      </tags>
   </entry>
 </search>

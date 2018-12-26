@@ -5,7 +5,7 @@
   
 
 
-<html class="theme-next muse use-motion" lang="zh-Hans">
+<html class="theme-next mist use-motion" lang="zh-Hans">
 <head><meta name="generator" content="Hexo 3.8.0">
   <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -75,7 +75,7 @@
   var NexT = window.NexT || {};
   var CONFIG = {
     root: '/',
-    scheme: 'Muse',
+    scheme: 'Mist',
     version: '6.0.6',
     sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":false,"onmobile":false},
     fancybox: false,
@@ -99,21 +99,22 @@
 
 
 
-  <meta name="description" content="title: 实现一个简单的推荐系统 categories:   机器学习   假设我们现在要为一个在线音乐网站的用户推荐乐队。用户可以用1至5星来评价一个乐队，其中包含半星（如2.5星）。下表展示了8位用户对8支乐队的评价： 表中的短横表示这位用户没有给这支乐队打分。我们在计算两个用户的距离时，只采用他们都评价过的乐队，比如要计算Angelica和Bill的距离，我们只会用到5支乐队。这两个用">
+  <meta name="description" content="假设我们现在要为一个在线音乐网站的用户推荐乐队。用户可以用1至5星来评价一个乐队，其中包含半星（如2.5星）。下表展示了8位用户对8支乐队的评价： 表中的短横表示这位用户没有给这支乐队打分。我们在计算两个用户的距离时，只采用他们都评价过的乐队，比如要计算Angelica和Bill的距离，我们只会用到5支乐队。这两个用户的曼哈顿距离为： 最后距离即是上方数据的加和：(1.5 + 1.5 + 3 +">
+<meta name="keywords" content="推荐">
 <meta property="og:type" content="article">
 <meta property="og:title" content="实现一个简单的推荐系统">
 <meta property="og:url" content="http://caioo0.github.io/2018/11/16/hello-world/index.html">
 <meta property="og:site_name" content="JoChoi&#39;s Blog">
-<meta property="og:description" content="title: 实现一个简单的推荐系统 categories:   机器学习   假设我们现在要为一个在线音乐网站的用户推荐乐队。用户可以用1至5星来评价一个乐队，其中包含半星（如2.5星）。下表展示了8位用户对8支乐队的评价： 表中的短横表示这位用户没有给这支乐队打分。我们在计算两个用户的距离时，只采用他们都评价过的乐队，比如要计算Angelica和Bill的距离，我们只会用到5支乐队。这两个用">
+<meta property="og:description" content="假设我们现在要为一个在线音乐网站的用户推荐乐队。用户可以用1至5星来评价一个乐队，其中包含半星（如2.5星）。下表展示了8位用户对8支乐队的评价： 表中的短横表示这位用户没有给这支乐队打分。我们在计算两个用户的距离时，只采用他们都评价过的乐队，比如要计算Angelica和Bill的距离，我们只会用到5支乐队。这两个用户的曼哈顿距离为： 最后距离即是上方数据的加和：(1.5 + 1.5 + 3 +">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://dataminingguide.books.yourtion.com/img/chapter-2/chapter-2-13.png">
 <meta property="og:image" content="https://dataminingguide.books.yourtion.com/img/chapter-2/chapter-2-14.png">
 <meta property="og:image" content="https://dataminingguide.books.yourtion.com/img/chapter-2/chapter-2-15.png">
 <meta property="og:image" content="https://dataminingguide.books.yourtion.com/img/chapter-2/chapter-2-16.png">
-<meta property="og:updated_time" content="2018-12-26T09:23:22.492Z">
+<meta property="og:updated_time" content="2018-12-26T09:29:47.887Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="实现一个简单的推荐系统">
-<meta name="twitter:description" content="title: 实现一个简单的推荐系统 categories:   机器学习   假设我们现在要为一个在线音乐网站的用户推荐乐队。用户可以用1至5星来评价一个乐队，其中包含半星（如2.5星）。下表展示了8位用户对8支乐队的评价： 表中的短横表示这位用户没有给这支乐队打分。我们在计算两个用户的距离时，只采用他们都评价过的乐队，比如要计算Angelica和Bill的距离，我们只会用到5支乐队。这两个用">
+<meta name="twitter:description" content="假设我们现在要为一个在线音乐网站的用户推荐乐队。用户可以用1至5星来评价一个乐队，其中包含半星（如2.5星）。下表展示了8位用户对8支乐队的评价： 表中的短横表示这位用户没有给这支乐队打分。我们在计算两个用户的距离时，只采用他们都评价过的乐队，比如要计算Angelica和Bill的距离，我们只会用到5支乐队。这两个用户的曼哈顿距离为： 最后距离即是上方数据的加和：(1.5 + 1.5 + 3 +">
 <meta name="twitter:image" content="https://dataminingguide.books.yourtion.com/img/chapter-2/chapter-2-13.png">
 
 
@@ -227,6 +228,15 @@
         
         
           
+  <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>Tags</a>
+</li>
+
+      
+        
+        
+          
   <li class="menu-item menu-item-categories">
     <a href="/categories/" rel="section">
       <i class="menu-item-icon fa fa-fw fa-th"></i> <br>Categories</a>
@@ -251,6 +261,9 @@
     
 
     
+    
+      
+      
     
       
       
@@ -334,7 +347,7 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-11-16T14:39:32+08:00">2018-11-16</time>
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-11-16T14:39:00+08:00">2018-11-16</time>
             
 
             
@@ -343,6 +356,24 @@
             
           </span>
 
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/机器学习/" itemprop="url" rel="index"><span itemprop="name">机器学习</span></a></span>
+
+                
+                
+              
+            </span>
           
 
           
@@ -381,14 +412,7 @@
       
 
       
-        <hr>
-<p>title: 实现一个简单的推荐系统</p>
-<p>categories: </p>
-<ul>
-<li>机器学习</li>
-</ul>
-<hr>
-<p>假设我们现在要为一个在线音乐网站的用户推荐乐队。用户可以用1至5星来评价一个乐队，其中包含半星（如2.5星）。下表展示了8位用户对8支乐队的评价：<br><img src="https://dataminingguide.books.yourtion.com/img/chapter-2/chapter-2-13.png" alt="乐队评分"></p>
+        <p>假设我们现在要为一个在线音乐网站的用户推荐乐队。用户可以用1至5星来评价一个乐队，其中包含半星（如2.5星）。下表展示了8位用户对8支乐队的评价：<br><img src="https://dataminingguide.books.yourtion.com/img/chapter-2/chapter-2-13.png" alt="乐队评分"></p>
 <p>表中的短横表示这位用户没有给这支乐队打分。我们在计算两个用户的距离时，只采用他们都评价过的乐队，比如要计算Angelica和Bill的距离，我们只会用到5支乐队。这两个用户的曼哈顿距离为：<br><img src="https://dataminingguide.books.yourtion.com/img/chapter-2/chapter-2-14.png" alt="乐队评分"></p>
 <p>最后距离即是上方数据的加和：(1.5 + 1.5 + 3 + 2 + 1)。<br>计算欧几里得距离的方法也是类似的，我们也只取双方都评价过的乐队。<br><img src="https://dataminingguide.books.yourtion.com/img/chapter-2/chapter-2-15.png" alt="乐队评分"></p>
 <p>用公式来描述即：<br><img src="https://dataminingguide.books.yourtion.com/img/chapter-2/chapter-2-16.png" alt="乐队评分"></p>
@@ -418,6 +442,12 @@
     
 
     <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/推荐/" rel="tag"># 推荐</a>
+          
+        </div>
       
 
       
@@ -528,7 +558,33 @@ var jiathis_config={
               
 
               
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                    <span class="site-state-item-count">1</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
 
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/README.html">
+                    
+                    
+                      
+                    
+                    <span class="site-state-item-count">1</span>
+                    <span class="site-state-item-name">tags</span>
+                  </a>
+                </div>
               
             </nav>
           
@@ -605,7 +661,7 @@ var jiathis_config={
 
 
 
-  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Muse</a> v6.0.6</div>
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.6</div>
 
 
 
