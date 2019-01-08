@@ -112,7 +112,7 @@
 <meta property="og:image" content="http://caioo0.github.io/images/output_17_0.png">
 <meta property="og:image" content="http://caioo0.github.io/images/output_20_0.png">
 <meta property="og:image" content="http://caioo0.github.io/images/output_21_0.png">
-<meta property="og:updated_time" content="2019-01-08T07:36:56.547Z">
+<meta property="og:updated_time" content="2019-01-08T07:40:25.441Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="使用python计算微积分学习笔记">
 <meta name="twitter:description" content="使用python计算微积分之一函数篇我们可以将函数(functions)想象成一台机器$f$  ，每当我们向机器提供输入$x$，这台机器便会产生输出$f(x)$。 这台机器所能接受的所有输入的集合称为定义域(domain)，其所有可能输出的集合称为值域(range)。函数的定义域和值域有着非常重要的意义，如果我们知道一个函数的定义域，便不会将不合适的输入丢给函数；知道函数的值域，便能判断一个值是否">
@@ -387,7 +387,6 @@
       
         <h2 id="使用python计算微积分之一函数篇"><a href="#使用python计算微积分之一函数篇" class="headerlink" title="使用python计算微积分之一函数篇"></a>使用python计算微积分之一函数篇</h2><p>我们可以将<strong>函数(functions)</strong>想象成一台机器$f$  ，每当我们向机器提供输入$x$，这台机器便会产生输出$f(x)$。</p>
 <p>这台机器所能接受的所有输入的集合称为<strong>定义域(domain)</strong>，其所有可能输出的集合称为<strong>值域(range)</strong>。函数的定义域和值域有着非常重要的意义，如果我们知道一个函数的定义域，便不会将不合适的输入丢给函数；知道函数的值域，便能判断一个值是否可能是这个函数所输出的。</p>
-<p>\begin{align}<br>x &amp;= a +b+c+d\<br> &amp;= e +f\<br> &amp;= g<br>\end{align}</p>
 <h3 id="多项式-polynomials-："><a href="#多项式-polynomials-：" class="headerlink" title="多项式(polynomials)："></a>多项式(polynomials)：</h3><p>\begin{align}<br>f(x) = x^3 - 5x^2 +9<br>\end{align}</p>
 <p>因为这是一个三次函数，当$x\to-\infty$时$f(x)\to-\infty$;当$x\to\infty$时$f(x)\to\infty$,因此这个函数的定义域和值域都是实属集$\mathbb{R}$<br><strong>Python实现：</strong></p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">f</span><span class="params">(x)</span>:</span></span><br><span class="line">    <span class="keyword">return</span> x**<span class="number">3</span> - <span class="number">5</span>*x**<span class="number">2</span> +<span class="number">9</span></span><br></pre></td></tr></table></figure>
