@@ -99,25 +99,25 @@
 
 
 
-  <meta name="description" content="时光不语  静待花开">
+  <meta name="description" content="什么是大数据？对于大数据，麦肯锡全球研究所给出的定义是：  ”一种规模大到在获取、存储、管理、分析方面大大超出了传统数据库软件工具能力范围的数据集合。“  大数据具有五大特点，称为5V。 1) 多样 （Variety） 大数据的多样性是指数据的种类和来源是多样化的，数据可以是结构化的、半结构化的以及非结构化的，数据的呈现形式包括但不仅限于文本，图像，视频，HTML页面等等。 2) 大量（Veloc">
 <meta name="keywords" content="算法 机器学习  深度学习  强化学习 数据挖掘">
-<meta property="og:type" content="website">
-<meta property="og:title" content="JoChoi&#39;s Blog">
-<meta property="og:url" content="http://caioo0.github.io/11111/index.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spark学习之什么是大数据">
+<meta property="og:url" content="http://caioo0.github.io/2020/01/29/Spark学习之强大的spark/index.html">
 <meta property="og:site_name" content="JoChoi&#39;s Blog">
-<meta property="og:description" content="时光不语  静待花开">
+<meta property="og:description" content="什么是大数据？对于大数据，麦肯锡全球研究所给出的定义是：  ”一种规模大到在获取、存储、管理、分析方面大大超出了传统数据库软件工具能力范围的数据集合。“  大数据具有五大特点，称为5V。 1) 多样 （Variety） 大数据的多样性是指数据的种类和来源是多样化的，数据可以是结构化的、半结构化的以及非结构化的，数据的呈现形式包括但不仅限于文本，图像，视频，HTML页面等等。 2) 大量（Veloc">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-01-08T07:56:57.850Z">
+<meta property="og:updated_time" content="2020-01-29T13:16:33.873Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="JoChoi&#39;s Blog">
-<meta name="twitter:description" content="时光不语  静待花开">
+<meta name="twitter:title" content="Spark学习之什么是大数据">
+<meta name="twitter:description" content="什么是大数据？对于大数据，麦肯锡全球研究所给出的定义是：  ”一种规模大到在获取、存储、管理、分析方面大大超出了传统数据库软件工具能力范围的数据集合。“  大数据具有五大特点，称为5V。 1) 多样 （Variety） 大数据的多样性是指数据的种类和来源是多样化的，数据可以是结构化的、半结构化的以及非结构化的，数据的呈现形式包括但不仅限于文本，图像，视频，HTML页面等等。 2) 大量（Veloc">
 
 
 
 
 
 
-  <link rel="canonical" href="http://caioo0.github.io/11111/">
+  <link rel="canonical" href="http://caioo0.github.io/2020/01/29/Spark学习之强大的spark/">
 
 
 
@@ -127,7 +127,7 @@
   };
 </script>
 
-  <title> | JoChoi's Blog</title>
+  <title>Spark学习之什么是大数据 | JoChoi's Blog</title>
   
 
 
@@ -299,43 +299,203 @@
 
   <div id="posts" class="posts-expand">
     
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://caioo0.github.io/2020/01/29/Spark学习之强大的spark/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Jo Choi">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1544796448457&di=de6ca0884fd0f74b7d691576231b193f&imgtype=0&src=http%3A%2F%2Fimgtu.5011.net%2Fuploads%2Fcontent%2F20170303%2F7795981488530133.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="JoChoi's Blog">
+    </span>
+
     
-    
-    <div class="post-block page">
       <header class="post-header">
 
-<h1 class="post-title" itemprop="name headline"></h1>
-
-<div class="post-meta">
-  
-  
-
-
-
-</div>
-
-</header>
-
-      
-      
-      
-      <div class="post-body">
         
         
+          <h1 class="post-title" itemprop="name headline">Spark学习之什么是大数据</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-01-29T21:10:00+08:00">2020-01-29</time>
+            
+
+            
+            
+
+            
+          </span>
+
           
-        
-      </div>
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
       
       
+
+      
+        <h2 id="什么是大数据？"><a href="#什么是大数据？" class="headerlink" title="什么是大数据？"></a>什么是大数据？</h2><p>对于大数据，麦肯锡全球研究所给出的定义是：</p>
+<blockquote>
+<p>”一种规模大到在获取、存储、管理、分析方面大大超出了传统数据库软件工具能力范围的数据集合。“</p>
+</blockquote>
+<p>大数据具有五大特点，称为5V。</p>
+<p>1) 多样 （Variety）</p>
+<p>大数据的多样性是指数据的种类和来源是多样化的，数据可以是结构化的、半结构化的以及非结构化的，数据的呈现形式包括但不仅限于文本，图像，视频，HTML页面等等。</p>
+<p>2) 大量（Velocity）</p>
+<p>大数据的大量性是指数据量的大小</p>
+<p>3）高速 （Velocity）</p>
+<p>大数据的高速性是指数据增长快速，处理快速，每一天，各行各业的数据都在呈现指数性爆炸增长。在许多场景下，数据都具有时效性，如搜索引擎要在几秒内呈现出用户所需数据。企业或者系统在面对快速增长的海量数据时，必须要高速处理，快速响应。</p>
+<p>4）低价值密度（Value）</p>
+<p>大数据的低价值密度性是指在海量的数据源中，真正有价值的数据少之又少，许多数据可能是错误的，是不完整的，是无法利用的。总体而言，有价值的数据占据数据总量的密度极低，提炼数据好比浪里淘沙</p>
+<p>5) 真实性 （Veracity）</p>
+<p>大数据的真实性是指数据的准确度和可信赖度，代表数据的质量。</p>
+<h4 id="更多资料：http-www-sohu-com-a-328555916-114819"><a href="#更多资料：http-www-sohu-com-a-328555916-114819" class="headerlink" title="更多资料：http://www.sohu.com/a/328555916_114819"></a>更多资料：<a href="http://www.sohu.com/a/328555916_114819" target="_blank" rel="noopener">http://www.sohu.com/a/328555916_114819</a></h4><h2 id="每个人都应该知道的硬件知识"><a href="#每个人都应该知道的硬件知识" class="headerlink" title="每个人都应该知道的硬件知识"></a>每个人都应该知道的硬件知识</h2><p><strong>中央处理器 (CPU)</strong> <code>0.4ns</code></p>
+<p>CPU 是电脑的中枢，计算机上的每个进程最终都由CPU处理，包括计算以及给电脑其他组件发出的指令。</p>
+<p><strong>内存 (RAM)</strong> <code>100ns</code></p>
+<p>程序运行时，在进入CPU之前，数据会临时存储在内存里。内存是临时存储，当电脑关闭时，内存中的数据就会丢失。</p>
+<p><strong>存储 (固态硬盘 或 磁盘)</strong> <code>16us</code></p>
+<p>存储是用于长时间保存数据的地方。程序运行时 CPU会让内存从长期存储中加载数据。</p>
+<p><strong>网络 (局域网 或者叫 互联网)</strong> <code>150ms</code></p>
+<p>网络是你获取任何未存储在计算机上的数据的通道。网络可以连接同个房间里的电脑（局域网）或者通过互联网连接世界另一头的电脑。</p>
+<p>其实，还有一些涉及一级和二级缓存、互斥锁定和分支错误预测的知识。虽然它们对于详细了解计算机内部的情况很重要，但对于本课程，你暂时不用了解这些。点击链接了解更多：<a href="http://norvig.com/21-days.html" target="_blank" rel="noopener">Peter Norvig</a> 的博客 ；硬件的<a href="https://colin-scott.github.io/personal_website/research/interactive_latency.html" target="_blank" rel="noopener">交互式版本</a>。</p>
+<h3 id="中央处理器："><a href="#中央处理器：" class="headerlink" title="中央处理器："></a><strong>中央处理器：</strong></h3><p>CPU是电脑的中枢。CPU有多个功能，包括给电脑的其他组件发送指令以及进行数学计算。CPU还会把少量的数据存在注册表里。存储器保存着CPU正在处理的数据。</p>
+<p>例如,你编写一个程序读取40MB 数据文件，然后分析该文件。当你执行代码时，指令会载入CPU。然后CPU指示计算机从硬盘读取40MB数据到内存（RAM）。如果对一列数据求和，那CPU会一次取两个数字，将他们相加。当CPU获取下一个数字时，之前累计的总和需要存储在某处。</p>
+<p>这个累计总和就会被存在注册表里。注册表使计算更高效：避免了在内存（RAM）和CPU之间不必要地来回发送数据。</p>
+<blockquote>
+<p><strong>习题1：</strong>2.5千兆赫的CPU意味着CPU每秒处理25亿次操作，如果每个操作 CPU处理8个字节的数据，那这个 CPU 一秒钟可以处理多少字节的数据呢？</p>
+<p><strong>解答：</strong>每秒25亿次操作 * 每次操作8个字节=每秒200亿字节</p>
+</blockquote>
+<blockquote>
+<p><strong>习题2:</strong><br>Twitter每秒生成约 6000 条推文，每条推文包含 200 个字节。所以一天 Twitter 产生的数据量级是:</p>
+</blockquote>
+<p>$$<br>(6000 推文 / 秒) x (86400 秒 / 天) x (200 字节 / 推文) ~ 1040 亿字节 / 天<br>$$</p>
+<blockquote>
+<p>知道 Twitter 每天创建大约1040亿字节的数据，那2.5 千兆赫的 CPU需要多长时间才能分析一整天的推文呢？</p>
+</blockquote>
+<blockquote>
+<p><strong>解答：</strong>A = (6000<em> 86400</em>200)/200000000000 = 0.5184 秒</p>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
       
     </div>
+
     
+
+    
+    
+    
+
+    
+        <div>
+          
+
+        </div>
+      
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Jo Choi</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://caioo0.github.io/2020/01/29/Spark学习之强大的spark/" title="Spark学习之什么是大数据">http://caioo0.github.io/2020/01/29/Spark学习之强大的spark/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明出处！</li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/01/23/workerman-1/" rel="next" title="Workderman禁用函数检查">
+                <i class="fa fa-chevron-left"></i> Workderman禁用函数检查
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
 
 
 
-    
-    
-    
+    <div class="post-spread">
+      
+    </div>
   </div>
 
 
@@ -365,8 +525,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
             
@@ -452,6 +621,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#什么是大数据？"><span class="nav-number">1.</span> <span class="nav-text">什么是大数据？</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#更多资料：http-www-sohu-com-a-328555916-114819"><span class="nav-number">1.0.1.</span> <span class="nav-text">更多资料：http://www.sohu.com/a/328555916_114819</span></a></li></ol></li></ol><li class="nav-item nav-level-2"><a class="nav-link" href="#每个人都应该知道的硬件知识"><span class="nav-number">2.</span> <span class="nav-text">每个人都应该知道的硬件知识</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#中央处理器："><span class="nav-number">2.1.</span> <span class="nav-text">中央处理器：</span></a></li></ol></li></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
