@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.0.6" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.6">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.6">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.6">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.6" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.6',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="阅读前思考  在你的应用场景中，哪些特征适合放在Wide侧，哪些特征适合放在Deep侧，为什么呢？ 为什么Wide部分要用L1 FTRL训练？ 为什么Deep部分不特别考虑稀疏性的问题？   介绍Wide&amp;amp;Deep推荐算法出自一篇论文《Wide&amp;amp;Deep Learning for RecommenderSystems》，Wide&amp;amp;Deep由两部分组成，分别是Wide和Dee">
+<meta name="keywords" content="算法 机器学习  深度学习  强化学习 数据挖掘">
+<meta property="og:type" content="article">
+<meta property="og:title" content="深度推荐系统作业：wide&amp;deep介绍和代码实现">
+<meta property="og:url" content="http://caioo0.github.io/2021/03/19/的/index.html">
+<meta property="og:site_name" content="JoChoi&#39;s Blog">
+<meta property="og:description" content="阅读前思考  在你的应用场景中，哪些特征适合放在Wide侧，哪些特征适合放在Deep侧，为什么呢？ 为什么Wide部分要用L1 FTRL训练？ 为什么Deep部分不特别考虑稀疏性的问题？   介绍Wide&amp;amp;Deep推荐算法出自一篇论文《Wide&amp;amp;Deep Learning for RecommenderSystems》，Wide&amp;amp;Deep由两部分组成，分别是Wide和Dee">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://ryluo.oss-cn-chengdu.aliyuncs.com/Javaimage-20200910214310877.png">
+<meta property="og:updated_time" content="2021-03-19T09:42:35.032Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="深度推荐系统作业：wide&amp;deep介绍和代码实现">
+<meta name="twitter:description" content="阅读前思考  在你的应用场景中，哪些特征适合放在Wide侧，哪些特征适合放在Deep侧，为什么呢？ 为什么Wide部分要用L1 FTRL训练？ 为什么Deep部分不特别考虑稀疏性的问题？   介绍Wide&amp;amp;Deep推荐算法出自一篇论文《Wide&amp;amp;Deep Learning for RecommenderSystems》，Wide&amp;amp;Deep由两部分组成，分别是Wide和Dee">
+<meta name="twitter:image" content="http://ryluo.oss-cn-chengdu.aliyuncs.com/Javaimage-20200910214310877.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://caioo0.github.io/2021/03/19/的/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>深度推荐系统作业：wide&deep介绍和代码实现 | JoChoi's Blog</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+    <a href="https://github.com/caioo0" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewbox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"/><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"/><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"/></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> 
+
+<div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">JoChoi's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Live AI</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+          
+  <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+</li>
+
+      
+
+      
+    </ul>
+  
+
+  
+    
+
+    
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+    
+
+  
+
+
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://caioo0.github.io/2021/03/19/的/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Jo Choi">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1544796448457&di=de6ca0884fd0f74b7d691576231b193f&imgtype=0&src=http%3A%2F%2Fimgtu.5011.net%2Fuploads%2Fcontent%2F20170303%2F7795981488530133.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="JoChoi's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">深度推荐系统作业：wide&deep介绍和代码实现</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-03-19T17:42:16+08:00">2021-03-19</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="阅读前思考"><a href="#阅读前思考" class="headerlink" title="阅读前思考"></a>阅读前思考</h2><blockquote>
+<ol>
+<li>在你的应用场景中，哪些特征适合放在Wide侧，哪些特征适合放在Deep侧，为什么呢？</li>
+<li>为什么Wide部分要用L1 FTRL训练？</li>
+<li>为什么Deep部分不特别考虑稀疏性的问题？</li>
+</ol>
+</blockquote>
+<h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>Wide&amp;Deep推荐算法出自一篇论文《Wide&amp;Deep Learning for RecommenderSystems》，Wide&amp;Deep由两部分组成，分别是Wide和Deep。Wide&amp;Deep 模型同时具备较强的 “记忆能力” 和“泛化能力”，模型能够从历史数据中学习到高频共现的特征组合的能力，称为是模型的Memorization。能够利用特征之间的传递性去探索历史数据中从未出现过的特征组合，称为是模型的Generalization。Wide&amp;Deep兼顾Memorization与Generalization并在Google Play store的场景中成功落地。</p>
+<p>先来说wide，表示的是generalized的推荐系统，传统的推荐系统都是通过线性算法基于离散特征来做推荐的。</p>
+<h2 id="Wide-amp-Deep原理"><a href="#Wide-amp-Deep原理" class="headerlink" title="Wide &amp; Deep原理"></a>Wide &amp; Deep原理</h2><p>首先我们来看下业内的常用的模型的结构图：</p>
+<div align="center"><br><img src="http://ryluo.oss-cn-chengdu.aliyuncs.com/Javaimage-20200910214310877.png" alt="image-20200910214310877" style="zoom:65%;"><br></div>
+
+<p>这张图源于论文，从左到右分别展示了Wide模型，Wide &amp; Deep模型以及Deep模型。从图上我们也看得出来所谓的Wide模型呢其实就是线性模型，Deep模型是深度神经网络模型。下面结合这张图对这两个部分做一个详细一点的介绍。</p>
+<h3 id="Wide部分"><a href="#Wide部分" class="headerlink" title="Wide部分"></a><strong>Wide部分</strong></h3><p>Wide部分就是一个广义的线性模型，表示为y=WX+b。X特征部分包括基础特征和交叉特征(cross-product transformation)。交叉特征在wide部分很重要，可以捕捉到特征间的交互，起到添加非线性的作用。交叉特征可表示为：</p>
+<p>$$\phi_{k}(x)=\prod_{i=1}^d x_i^{c_{ki}}, c_{ki}\in {0,1}<br>$$</p>
+<p>$c_{ki}是一个布尔变量，当第个特征属于第个特征组合时，是一个布尔变量，当第i个特征属于第k个特征组合时，c_{ki}的值为，否则为，的值为1，否则为0，x_i$是第i个特征的值，大体意思就是两个特征都同时为1这个新的特征才能为1，否则就是0，说白了就是一个特征组合。用原论文的例子举例：</p>
+<blockquote>
+<p>AND(user_installed_app=QQ, impression_app=WeChat)，当特征user_installed_app=QQ,和特征impression_app=WeChat取值都为1的时候，组合特征AND(user_installed_app=QQ, impression_app=WeChat)的取值才为1，否则为0。</p>
+</blockquote>
+<p>对于wide部分训练时候使用的优化器是带L_1正则的FTRL算法(Follow-the-regularized-leader)，而L1 FTLR是非常注重模型稀疏性质的，也就是说W&amp;D模型采用L1 FTRL是想让Wide部分变得更加的稀疏，即Wide部分的大部分参数都为0，这就大大压缩了模型权重及特征向量的维度。<strong>Wide部分模型训练完之后留下来的特征都是非常重要的，那么模型的“记忆能力”就可以理解为发现”直接的”，“暴力的”，“显然的”关联规则的能力。</strong>例如Google W&amp;D期望wide部分发现这样的规则：<strong>用户安装了应用A，此时曝光应用B，用户安装应用B的概率大。</strong></p>
+<p><strong>优点：</strong> 模型结构简单，具有较强的“记忆能力” （memorization） ，可直接学习并利用历史数据中物品或者特征的“共现频率”的能力，原始数据往往可以直接影响推荐结果。</p>
+<p><strong>缺点：</strong>依赖人工特征工程,需要人工经验，这种推荐只对用户操作过的商品有效。</p>
+<h2 id="Deep部分"><a href="#Deep部分" class="headerlink" title="Deep部分"></a><strong>Deep部分</strong></h2><p>Deep部分就是个前馈网络模型(深度神经网络模型)。通过深度学习学习出来的一些向量，这些向量是隐性特征，往往是没有明确可解释性的。这些向量也可以作为特征的一部分参与到训练中。这部分特征是深度学习框架自动生成的，无需人力干预。<br>特征首先转换为低维稠密向量，维度通常O（10）-O（100）。向量随机初始化，经过最小化随时函数训练模型。激活函数采用Relu。前馈部分表示如下：<br>公式<br>​<br>$$a^{(l+1)} = f(W^{l}a^{(l)} + b^{l})$$</p>
+<p><strong>优点：</strong> 模型具有 “泛化能力” generalization ，找到不易于发现的规律</p>
+<p><strong>缺点：</strong>不易于解释，计算量大</p>
+<h2 id="Wide-amp-Deep联合训练"><a href="#Wide-amp-Deep联合训练" class="headerlink" title="Wide&amp;Deep联合训练"></a><strong>Wide&amp;Deep联合训练</strong></h2><p>在联合模型中，Wide和Deep部分的输出通过加权方式合并到一起，并通过logistic loss function进行最终输出。</p>
+<p>联合训练和模型集成要进行区分，他们有着以下两点区别：</p>
+<p>训练方式。 集成模型的子模型部分是独立训练，只在inference阶段合并预测。而联合训练模型是同时训练同时产出的。<br>模型规模。集成模型独立训练，模型规模要大一些才能达到可接受的效果。而联合训练模型中，Wide部分只需补充Deep模型的缺点，即记忆能力，这部分主要通过小规模的交叉特征实现。因此联合训练模型的Wide部分的模型特征较小。<br>联合模型求解采用FTRL算法，L1正则。深度部分用AdaGrad优化算法。</p>
+<p><strong>优点：</strong>同时学习低阶和高阶组合特征，它混合了一个线性模型（Wide part）和Deep模型(Deep part)，能够快速处理并记忆大量历史行为特征，并<br>且具有强大的表达能力。</p>
+<p><strong>缺点：</strong>这两部分模型需要不同的输入，而Wide part部分的输入，依旧依赖人工特征工程。</p>
+<h2 id="代码实现："><a href="#代码实现：" class="headerlink" title="代码实现："></a>代码实现：</h2><p>完整数据集:<a href="https://labs.criteo.com/2014/02/download-kaggle-display-advertising-challenge-dataset/" target="_blank" rel="noopener">crite</a></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding=utf-8</span></span><br><span class="line"><span class="comment"># Author:Jo Choi</span></span><br><span class="line"><span class="comment"># Date:2021-03-18</span></span><br><span class="line"><span class="comment"># Email:cai_oo@sina.com.cn</span></span><br><span class="line"><span class="comment"># Blog: *</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">数据集：criteo_sample</span></span><br><span class="line"><span class="string">------------------------------</span></span><br><span class="line"><span class="string">运行结果：</span></span><br><span class="line"><span class="string">----------------------------</span></span><br><span class="line"><span class="string">loss: 0.4625 - binary_crossentropy: 0.4625 - auc: 0.822 - 0s 36ms/step - loss: 0.4164 - </span></span><br><span class="line"><span class="string">binary_crossentropy: 0.4164 - auc: 0.8191 - val_loss: 0.6470 - </span></span><br><span class="line"><span class="string">val_binary_crossentropy: 0.6470 - val_auc: 0.6595</span></span><br><span class="line"><span class="string">----------------------------</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> itertools</span><br><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np </span><br><span class="line"><span class="keyword">from</span> tqdm <span class="keyword">import</span> tqdm</span><br><span class="line"><span class="keyword">from</span> collections <span class="keyword">import</span> namedtuple</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"><span class="keyword">from</span> tensorflow <span class="keyword">import</span> keras</span><br><span class="line"><span class="keyword">from</span> tensorflow.keras.layers <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">from</span> tensorflow.keras.models <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> sklearn.model_selection <span class="keyword">import</span> train_test_split</span><br><span class="line"><span class="keyword">from</span> sklearn.preprocessing <span class="keyword">import</span> MinMaxScaler,LabelEncoder</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> utils <span class="keyword">import</span> SparseFeat, DenseFeat, VarLenSparseFeat</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">data_process</span><span class="params">(data_df,dense_features,sparse_features)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    数据预处理，包括填充缺失值，数值处理，类别编码</span></span><br><span class="line"><span class="string">    :param data_df: Data_Frame格式的数据</span></span><br><span class="line"><span class="string">    :param dense_features: 数值特征名称列表</span></span><br><span class="line"><span class="string">    :param sparse_features: 离散特征名称列表</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">     <span class="comment">#数值型特征缺失值填充0.0</span></span><br><span class="line">    data_df[dense_features] = data_df[dense_features].fillna(<span class="number">0.0</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> f <span class="keyword">in</span> dense_features:</span><br><span class="line">        data_df[f] = data_df[f].apply(<span class="keyword">lambda</span> x: np.log(x + <span class="number">1</span>) <span class="keyword">if</span> x &gt; <span class="number">-1</span> <span class="keyword">else</span> <span class="number">-1</span>)</span><br><span class="line">     </span><br><span class="line">    <span class="comment">#离散型特征缺失值填充-1   </span></span><br><span class="line">    data_df[sparse_features] = data_df[sparse_features].fillna(<span class="string">"-1"</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> f <span class="keyword">in</span> sparse_features:</span><br><span class="line">        <span class="comment">#标准化</span></span><br><span class="line">        lbe = LabelEncoder()</span><br><span class="line">        data_df[f] = lbe.fit_transform(data_df[f])</span><br><span class="line">    </span><br><span class="line">    <span class="comment">#返回    </span></span><br><span class="line">    <span class="keyword">return</span> data_df[dense_features + sparse_features]</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">build_input_layers</span><span class="params">(feature_columns)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    构建输入层</span></span><br><span class="line"><span class="string">    :param feature_columns : 数据集中的所有特征对应的特征标记</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 构建input 层字典，并以dense 和 sparse 两类字典的形式返回</span></span><br><span class="line">    dense_input_dict,sparse_input_dict = &#123;&#125; ,&#123;&#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> fc <span class="keyword">in</span> feature_columns:</span><br><span class="line">        <span class="keyword">if</span> isinstance(fc,SparseFeat):</span><br><span class="line">            sparse_input_dict[fc.name] = Input(shape = (<span class="number">1</span>,), name = fc.name)</span><br><span class="line">        <span class="keyword">elif</span> isinstance(fc,DenseFeat):</span><br><span class="line">            dense_input_dict[fc.name] = Input(shape = (fc.dimension, ), name = fc.name)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> dense_input_dict, sparse_input_dict</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">build_embedding_layers</span><span class="params">(feature_columns, input_layers_dict, is_linear)</span>:</span></span><br><span class="line">    <span class="comment"># 定义一个embedding层对应的字典</span></span><br><span class="line">    embedding_layers_dict = dict()</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 将特征中的sparse特征筛选出来</span></span><br><span class="line">    sparse_feature_columns = list(filter(<span class="keyword">lambda</span> x: isinstance(x, SparseFeat), feature_columns)) <span class="keyword">if</span> feature_columns <span class="keyword">else</span> []</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 如果是用于线性部分的embedding层，其维度为1，否则维度就是自己定义的embedding维度</span></span><br><span class="line">    <span class="keyword">if</span> is_linear:</span><br><span class="line">        <span class="keyword">for</span> fc <span class="keyword">in</span> sparse_feature_columns:</span><br><span class="line">            embedding_layers_dict[fc.name] = Embedding(fc.vocabulary_size + <span class="number">1</span>, <span class="number">1</span>, name = <span class="string">'1d_emb_'</span> + fc.name)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">for</span> fc <span class="keyword">in</span> sparse_feature_columns:</span><br><span class="line">            embedding_layers_dict[fc.name] = Embedding(fc.vocabulary_size + <span class="number">1</span>, fc.embedding_dim , name = <span class="string">'kd_emb_'</span> + fc.name) </span><br><span class="line">            </span><br><span class="line">    <span class="keyword">return</span> embedding_layers_dict </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_linear_logits</span><span class="params">(dense_input_dict, sparse_input_dict, sparse_feature_columns)</span>:</span></span><br><span class="line">    <span class="comment"># 将所有的dense特征的Input层，然后经过一个全连接层得到dense特征的logits</span></span><br><span class="line">    concat_dense_inputs = Concatenate(axis=<span class="number">1</span>)(list(dense_input_dict.values()))</span><br><span class="line">    dense_logits_output = Dense(<span class="number">1</span>)(concat_dense_inputs)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 获取linear部分sparse特征的embedding层，这里使用embedding的原因是：</span></span><br><span class="line">    <span class="comment"># 对于linear部分直接将特征进行onehot然后通过一个全连接层，当维度特别大的时候，计算比较慢</span></span><br><span class="line">    <span class="comment"># 使用embedding层的好处就是可以通过查表的方式获取到哪些非零的元素对应的权重，然后在将这些权重相加，效率比较高</span></span><br><span class="line">    linear_embedding_layers = build_embedding_layers(sparse_feature_columns, sparse_input_dict, is_linear=<span class="keyword">True</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 将一维的embedding拼接，注意这里需要使用一个Flatten层，使维度对应</span></span><br><span class="line">    sparse_1d_embed = []</span><br><span class="line">    <span class="keyword">for</span> fc <span class="keyword">in</span> sparse_feature_columns:</span><br><span class="line">        feat_input = sparse_input_dict[fc.name]</span><br><span class="line">        embed = Flatten()(linear_embedding_layers[fc.name](feat_input)) <span class="comment"># B x 1</span></span><br><span class="line">        sparse_1d_embed.append(embed)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># embedding中查询得到的权重就是对应onehot向量中一个位置的权重，所以后面不用再接一个全连接了，本身一维的embedding就相当于全连接</span></span><br><span class="line">    <span class="comment"># 只不过是这里的输入特征只有0和1，所以直接向非零元素对应的权重相加就等同于进行了全连接操作(非零元素部分乘的是1)</span></span><br><span class="line">    sparse_logits_output = Add()(sparse_1d_embed)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 最终将dense特征和sparse特征对应的logits相加，得到最终linear的logits</span></span><br><span class="line">    linear_logits = Add()([dense_logits_output, sparse_logits_output])</span><br><span class="line">    <span class="keyword">return</span> linear_logits</span><br><span class="line"></span><br><span class="line"><span class="comment"># 将所有的sparse特征embedding拼接</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">concat_embedding_list</span><span class="params">(feature_columns, input_layer_dict, embedding_layer_dict, flatten = False)</span>:</span></span><br><span class="line">    <span class="comment"># 将sparse特征筛选出来</span></span><br><span class="line">    sparse_feature_columns = list(filter(<span class="keyword">lambda</span> x: isinstance(x, SparseFeat), feature_columns))</span><br><span class="line">    </span><br><span class="line">    embedding_list = []</span><br><span class="line">    <span class="keyword">for</span> fc <span class="keyword">in</span> sparse_feature_columns:</span><br><span class="line">        <span class="comment"># 获取输入层</span></span><br><span class="line">        _input = input_layer_dict[fc.name]</span><br><span class="line">        <span class="comment"># B x 1 x dim 获取对应的embedding层</span></span><br><span class="line">        _embed = embedding_layer_dict[fc.name]</span><br><span class="line">        <span class="comment"># B x dim 将input层输入到embedding层中</span></span><br><span class="line">        embed = _embed(_input)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 是否需要flatten , 如果embedding列表最终是直接输入到Dense层中，需要进行Flatten,否则不需要</span></span><br><span class="line">        <span class="keyword">if</span> flatten:</span><br><span class="line">            embed = Flatten()(embed)</span><br><span class="line">        </span><br><span class="line">        embedding_list.append(embed)</span><br><span class="line">        </span><br><span class="line">    <span class="keyword">return</span> embedding_list </span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_dnn_logits</span><span class="params">(dense_input_dict, sparse_input_dict, sparse_feature_columns, dnn_embedding_layers)</span>:</span></span><br><span class="line">    concat_dense_inputs = Concatenate(axis=<span class="number">1</span>)(list(dense_input_dict.values())) <span class="comment"># B x n1 (n表示的是dense特征的维度) </span></span><br><span class="line"></span><br><span class="line">    sparse_kd_embed = concat_embedding_list(sparse_feature_columns, sparse_input_dict, dnn_embedding_layers, flatten=<span class="keyword">True</span>)</span><br><span class="line"></span><br><span class="line">    concat_sparse_kd_embed = Concatenate(axis=<span class="number">1</span>)(sparse_kd_embed) <span class="comment"># B x n2k  (n2表示的是Sparse特征的维度)</span></span><br><span class="line"></span><br><span class="line">    dnn_input = Concatenate(axis=<span class="number">1</span>)([concat_dense_inputs, concat_sparse_kd_embed]) <span class="comment"># B x (n2k + n1)</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># dnn层，这里的Dropout参数，Dense中的参数及Dense的层数都可以自己设定</span></span><br><span class="line">    dnn_out = Dropout(<span class="number">0.5</span>)(Dense(<span class="number">1024</span>, activation=<span class="string">'relu'</span>)(dnn_input))  </span><br><span class="line">    dnn_out = Dropout(<span class="number">0.3</span>)(Dense(<span class="number">512</span>, activation=<span class="string">'relu'</span>)(dnn_out))</span><br><span class="line">    dnn_out = Dropout(<span class="number">0.1</span>)(Dense(<span class="number">256</span>, activation=<span class="string">'relu'</span>)(dnn_out))</span><br><span class="line"></span><br><span class="line">    dnn_logits = Dense(<span class="number">1</span>)(dnn_out)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> dnn_logits</span><br><span class="line"></span><br><span class="line"><span class="comment"># Wide&amp;Deep 模型的wide部分及Deep部分的特征选择，应该根据实际的业务场景去确定哪些特征应该放在Wide部分，哪些特征应该放在Deep部分</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">WideNDeep</span><span class="params">(linear_feature_columns, dnn_feature_columns)</span>:</span></span><br><span class="line">    <span class="comment"># 构建输入层，即所有特征对应的Input()层，这里使用字典的形式返回，方便后续构建模型</span></span><br><span class="line">    dense_input_dict, sparse_input_dict = build_input_layers(linear_feature_columns + dnn_feature_columns)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 将linear部分的特征中sparse特征筛选出来，后面用来做1维的embedding</span></span><br><span class="line">    linear_sparse_feature_columns = list(filter(<span class="keyword">lambda</span> x: isinstance(x, SparseFeat), linear_feature_columns))</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 构建模型的输入层，模型的输入层不能是字典的形式，应该将字典的形式转换成列表的形式</span></span><br><span class="line">    <span class="comment"># 注意：这里实际的输入与Input()层的对应，是通过模型输入时候的字典数据的key与对应name的Input层</span></span><br><span class="line">    input_layers = list(dense_input_dict.values()) + list(sparse_input_dict.values())</span><br><span class="line"></span><br><span class="line">    <span class="comment"># Wide&amp;Deep模型论文中Wide部分使用的特征比较简单，并且得到的特征非常的稀疏，所以使用了FTRL优化Wide部分（这里没有实现FTRL）</span></span><br><span class="line">    <span class="comment"># 但是是根据他们业务进行选择的，我们这里将所有可能用到的特征都输入到Wide部分，具体的细节可以根据需求进行修改</span></span><br><span class="line">    linear_logits = get_linear_logits(dense_input_dict, sparse_input_dict, linear_sparse_feature_columns)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 构建维度为k的embedding层，这里使用字典的形式返回，方便后面搭建模型</span></span><br><span class="line">    embedding_layers = build_embedding_layers(dnn_feature_columns, sparse_input_dict, is_linear=<span class="keyword">False</span>)</span><br><span class="line"></span><br><span class="line">    dnn_sparse_feature_columns = list(filter(<span class="keyword">lambda</span> x: isinstance(x, SparseFeat), dnn_feature_columns))</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 在Wide&amp;Deep模型中，deep部分的输入是将dense特征和embedding特征拼在一起输入到dnn中</span></span><br><span class="line">    dnn_logits = get_dnn_logits(dense_input_dict, sparse_input_dict, dnn_sparse_feature_columns, embedding_layers)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 将linear,dnn的logits相加作为最终的logits</span></span><br><span class="line">    output_logits = Add()([linear_logits, dnn_logits])</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 这里的激活函数使用sigmoid</span></span><br><span class="line">    output_layer = Activation(<span class="string">"sigmoid"</span>)(output_logits)</span><br><span class="line"></span><br><span class="line">    model = Model(input_layers, output_layer)</span><br><span class="line">    <span class="keyword">return</span> model</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:</span><br><span class="line">    <span class="comment"># 读取数据</span></span><br><span class="line">    data = pd.read_csv(<span class="string">'./data/criteo_sample.txt'</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 划分dense和sparse特征</span></span><br><span class="line">    columns = data.columns.values</span><br><span class="line">    dense_features = [feat <span class="keyword">for</span> feat <span class="keyword">in</span> columns <span class="keyword">if</span> <span class="string">'I'</span> <span class="keyword">in</span> feat]</span><br><span class="line">    sparse_features = [feat <span class="keyword">for</span> feat <span class="keyword">in</span> columns <span class="keyword">if</span> <span class="string">'C'</span> <span class="keyword">in</span> feat]</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 简单的数据预处理</span></span><br><span class="line">    train_data = data_process(data, dense_features, sparse_features)</span><br><span class="line">    train_data[<span class="string">'label'</span>] = data[<span class="string">'label'</span>]</span><br><span class="line">    </span><br><span class="line">  <span class="comment"># 将特征分组，分成linear部分和dnn部分(根据实际场景进行选择)，并将分组之后的特征做标记（使用DenseFeat, SparseFeat）</span></span><br><span class="line">    linear_feature_columns = [SparseFeat(feat, vocabulary_size=data[feat].nunique(),embedding_dim=<span class="number">4</span>)</span><br><span class="line">                            <span class="keyword">for</span> i,feat <span class="keyword">in</span> enumerate(sparse_features)] + [DenseFeat(feat, <span class="number">1</span>,)</span><br><span class="line">                            <span class="keyword">for</span> feat <span class="keyword">in</span> dense_features]</span><br><span class="line"></span><br><span class="line">    dnn_feature_columns = [SparseFeat(feat, vocabulary_size=data[feat].nunique(),embedding_dim=<span class="number">4</span>)</span><br><span class="line">                            <span class="keyword">for</span> i,feat <span class="keyword">in</span> enumerate(sparse_features)] + [DenseFeat(feat, <span class="number">1</span>,)</span><br><span class="line">                            <span class="keyword">for</span> feat <span class="keyword">in</span> dense_features]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 构建WideNDeep模型</span></span><br><span class="line">    history = WideNDeep(linear_feature_columns, dnn_feature_columns)</span><br><span class="line">    history.summary()</span><br><span class="line">    history.compile(optimizer=<span class="string">"adam"</span>, </span><br><span class="line">                loss=<span class="string">"binary_crossentropy"</span>, </span><br><span class="line">                metrics=[<span class="string">"binary_crossentropy"</span>, tf.keras.metrics.AUC(name=<span class="string">'auc'</span>)])</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 将输入数据转化成字典的形式输入</span></span><br><span class="line">    train_model_input = &#123;name: data[name] <span class="keyword">for</span> name <span class="keyword">in</span> dense_features + sparse_features&#125;</span><br><span class="line">    <span class="comment"># 模型训练</span></span><br><span class="line">    history.fit(train_model_input, train_data[<span class="string">'label'</span>].values,</span><br><span class="line">            batch_size=<span class="number">64</span>, epochs=<span class="number">8</span>, validation_split=<span class="number">0.2</span>, )</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br><span class="line">286</span><br><span class="line">287</span><br><span class="line">288</span><br><span class="line">289</span><br><span class="line">290</span><br><span class="line">291</span><br><span class="line">292</span><br><span class="line">293</span><br><span class="line">294</span><br><span class="line">295</span><br><span class="line">296</span><br><span class="line">297</span><br><span class="line">298</span><br><span class="line">299</span><br><span class="line">300</span><br><span class="line">301</span><br><span class="line">302</span><br><span class="line">303</span><br><span class="line">304</span><br><span class="line">305</span><br><span class="line">306</span><br><span class="line">307</span><br><span class="line">308</span><br><span class="line">309</span><br><span class="line">310</span><br><span class="line">311</span><br><span class="line">312</span><br><span class="line">313</span><br><span class="line">314</span><br><span class="line">315</span><br><span class="line">316</span><br><span class="line">317</span><br><span class="line">318</span><br><span class="line">319</span><br><span class="line">320</span><br><span class="line">321</span><br><span class="line">322</span><br><span class="line">323</span><br><span class="line">324</span><br><span class="line">325</span><br><span class="line">326</span><br><span class="line">327</span><br><span class="line">328</span><br><span class="line">329</span><br><span class="line">330</span><br><span class="line">331</span><br><span class="line">332</span><br><span class="line">333</span><br><span class="line">334</span><br><span class="line">335</span><br><span class="line">336</span><br><span class="line">337</span><br><span class="line">338</span><br><span class="line">339</span><br><span class="line">340</span><br><span class="line">341</span><br><span class="line">342</span><br><span class="line">343</span><br><span class="line">344</span><br><span class="line">345</span><br><span class="line">346</span><br><span class="line">347</span><br><span class="line">348</span><br><span class="line">349</span><br><span class="line">350</span><br><span class="line">351</span><br><span class="line">352</span><br><span class="line">353</span><br><span class="line">354</span><br><span class="line">355</span><br><span class="line">356</span><br><span class="line">357</span><br><span class="line">358</span><br><span class="line">359</span><br><span class="line">360</span><br><span class="line">361</span><br><span class="line">362</span><br><span class="line">363</span><br><span class="line">364</span><br><span class="line">365</span><br><span class="line">366</span><br><span class="line">367</span><br><span class="line">368</span><br><span class="line">369</span><br><span class="line">370</span><br><span class="line">371</span><br><span class="line">372</span><br><span class="line">373</span><br><span class="line">374</span><br><span class="line">375</span><br><span class="line">376</span><br><span class="line">377</span><br><span class="line">378</span><br><span class="line">379</span><br><span class="line">380</span><br><span class="line">381</span><br><span class="line">382</span><br><span class="line">383</span><br><span class="line">384</span><br><span class="line">385</span><br><span class="line">386</span><br><span class="line">387</span><br><span class="line">388</span><br><span class="line">389</span><br><span class="line">390</span><br><span class="line">391</span><br><span class="line">392</span><br><span class="line">393</span><br><span class="line">394</span><br><span class="line">395</span><br><span class="line">396</span><br><span class="line">397</span><br><span class="line">398</span><br><span class="line">399</span><br><span class="line">400</span><br><span class="line">401</span><br><span class="line">402</span><br><span class="line">403</span><br><span class="line">404</span><br><span class="line">405</span><br><span class="line">406</span><br><span class="line">407</span><br><span class="line">408</span><br><span class="line">409</span><br><span class="line">410</span><br><span class="line">411</span><br><span class="line">412</span><br><span class="line">413</span><br><span class="line">414</span><br><span class="line">415</span><br><span class="line">416</span><br><span class="line">417</span><br><span class="line">418</span><br><span class="line">419</span><br></pre></td><td class="code"><pre><span class="line">Model: &quot;functional_3&quot;</span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">Layer (type)                    Output Shape         Param #     Connected to                     </span><br><span class="line">==================================================================================================</span><br><span class="line">C1 (InputLayer)                 [(None, 1)]          0                                            </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">C2 (InputLayer)                 [(None, 1)]          0                                            </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">C3 (InputLayer)                 [(None, 1)]          0                                            </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">C4 (InputLayer)                 [(None, 1)]          0                                            </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">C5 (InputLayer)                 [(None, 1)]          0                                            </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">C6 (InputLayer)                 [(None, 1)]          0                                            </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">C7 (InputLayer)                 [(None, 1)]          0                                            </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">C8 (InputLayer)                 [(None, 1)]          0                                            </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">C9 (InputLayer)                 [(None, 1)]          0                                            </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">C10 (InputLayer)                [(None, 1)]          0                                            </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">C11 (InputLayer)                [(None, 1)]          0                                            </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">C12 (InputLayer)                [(None, 1)]          0                                            </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">C13 (InputLayer)                [(None, 1)]          0                                            </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">C14 (InputLayer)                [(None, 1)]          0                                            </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">C15 (InputLayer)                [(None, 1)]          0                                            </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">C16 (InputLayer)                [(None, 1)]          0                                            </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">C17 (InputLayer)                [(None, 1)]          0                                            </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">C18 (InputLayer)                [(None, 1)]          0                                            </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">C19 (InputLayer)                [(None, 1)]          0                                            </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">C20 (InputLayer)                [(None, 1)]          0                                            </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">C21 (InputLayer)                [(None, 1)]          0                                            </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">C22 (InputLayer)                [(None, 1)]          0                                            </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">C23 (InputLayer)                [(None, 1)]          0                                            </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">C24 (InputLayer)                [(None, 1)]          0                                            </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">C25 (InputLayer)                [(None, 1)]          0                                            </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">C26 (InputLayer)                [(None, 1)]          0                                            </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">kd_emb_C1 (Embedding)           (None, 1, 4)         112         C1[0][0]                         </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">kd_emb_C2 (Embedding)           (None, 1, 4)         372         C2[0][0]                         </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">kd_emb_C3 (Embedding)           (None, 1, 4)         692         C3[0][0]                         </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">kd_emb_C4 (Embedding)           (None, 1, 4)         632         C4[0][0]                         </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">kd_emb_C5 (Embedding)           (None, 1, 4)         52          C5[0][0]                         </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">kd_emb_C6 (Embedding)           (None, 1, 4)         32          C6[0][0]                         </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">kd_emb_C7 (Embedding)           (None, 1, 4)         736         C7[0][0]                         </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">kd_emb_C8 (Embedding)           (None, 1, 4)         80          C8[0][0]                         </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">kd_emb_C9 (Embedding)           (None, 1, 4)         12          C9[0][0]                         </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">kd_emb_C10 (Embedding)          (None, 1, 4)         572         C10[0][0]                        </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">kd_emb_C11 (Embedding)          (None, 1, 4)         696         C11[0][0]                        </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">kd_emb_C12 (Embedding)          (None, 1, 4)         684         C12[0][0]                        </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">kd_emb_C13 (Embedding)          (None, 1, 4)         668         C13[0][0]                        </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">kd_emb_C14 (Embedding)          (None, 1, 4)         60          C14[0][0]                        </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">kd_emb_C15 (Embedding)          (None, 1, 4)         684         C15[0][0]                        </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">kd_emb_C16 (Embedding)          (None, 1, 4)         676         C16[0][0]                        </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">kd_emb_C17 (Embedding)          (None, 1, 4)         40          C17[0][0]                        </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">kd_emb_C18 (Embedding)          (None, 1, 4)         512         C18[0][0]                        </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">kd_emb_C19 (Embedding)          (None, 1, 4)         180         C19[0][0]                        </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">kd_emb_C20 (Embedding)          (None, 1, 4)         20          C20[0][0]                        </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">kd_emb_C21 (Embedding)          (None, 1, 4)         680         C21[0][0]                        </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">kd_emb_C22 (Embedding)          (None, 1, 4)         28          C22[0][0]                        </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">kd_emb_C23 (Embedding)          (None, 1, 4)         44          C23[0][0]                        </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">kd_emb_C24 (Embedding)          (None, 1, 4)         504         C24[0][0]                        </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">kd_emb_C25 (Embedding)          (None, 1, 4)         84          C25[0][0]                        </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">kd_emb_C26 (Embedding)          (None, 1, 4)         364         C26[0][0]                        </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">I1 (InputLayer)                 [(None, 1)]          0                                            </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">I2 (InputLayer)                 [(None, 1)]          0                                            </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">I3 (InputLayer)                 [(None, 1)]          0                                            </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">I4 (InputLayer)                 [(None, 1)]          0                                            </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">I5 (InputLayer)                 [(None, 1)]          0                                            </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">I6 (InputLayer)                 [(None, 1)]          0                                            </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">I7 (InputLayer)                 [(None, 1)]          0                                            </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">I8 (InputLayer)                 [(None, 1)]          0                                            </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">I9 (InputLayer)                 [(None, 1)]          0                                            </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">I10 (InputLayer)                [(None, 1)]          0                                            </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">I11 (InputLayer)                [(None, 1)]          0                                            </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">I12 (InputLayer)                [(None, 1)]          0                                            </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">I13 (InputLayer)                [(None, 1)]          0                                            </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_52 (Flatten)            (None, 4)            0           kd_emb_C1[0][0]                  </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_53 (Flatten)            (None, 4)            0           kd_emb_C2[0][0]                  </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_54 (Flatten)            (None, 4)            0           kd_emb_C3[0][0]                  </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_55 (Flatten)            (None, 4)            0           kd_emb_C4[0][0]                  </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_56 (Flatten)            (None, 4)            0           kd_emb_C5[0][0]                  </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_57 (Flatten)            (None, 4)            0           kd_emb_C6[0][0]                  </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_58 (Flatten)            (None, 4)            0           kd_emb_C7[0][0]                  </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_59 (Flatten)            (None, 4)            0           kd_emb_C8[0][0]                  </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_60 (Flatten)            (None, 4)            0           kd_emb_C9[0][0]                  </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_61 (Flatten)            (None, 4)            0           kd_emb_C10[0][0]                 </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_62 (Flatten)            (None, 4)            0           kd_emb_C11[0][0]                 </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_63 (Flatten)            (None, 4)            0           kd_emb_C12[0][0]                 </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_64 (Flatten)            (None, 4)            0           kd_emb_C13[0][0]                 </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_65 (Flatten)            (None, 4)            0           kd_emb_C14[0][0]                 </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_66 (Flatten)            (None, 4)            0           kd_emb_C15[0][0]                 </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_67 (Flatten)            (None, 4)            0           kd_emb_C16[0][0]                 </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_68 (Flatten)            (None, 4)            0           kd_emb_C17[0][0]                 </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_69 (Flatten)            (None, 4)            0           kd_emb_C18[0][0]                 </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_70 (Flatten)            (None, 4)            0           kd_emb_C19[0][0]                 </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_71 (Flatten)            (None, 4)            0           kd_emb_C20[0][0]                 </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_72 (Flatten)            (None, 4)            0           kd_emb_C21[0][0]                 </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_73 (Flatten)            (None, 4)            0           kd_emb_C22[0][0]                 </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_74 (Flatten)            (None, 4)            0           kd_emb_C23[0][0]                 </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_75 (Flatten)            (None, 4)            0           kd_emb_C24[0][0]                 </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_76 (Flatten)            (None, 4)            0           kd_emb_C25[0][0]                 </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_77 (Flatten)            (None, 4)            0           kd_emb_C26[0][0]                 </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">concatenate_4 (Concatenate)     (None, 13)           0           I1[0][0]                         </span><br><span class="line">                                                                 I2[0][0]                         </span><br><span class="line">                                                                 I3[0][0]                         </span><br><span class="line">                                                                 I4[0][0]                         </span><br><span class="line">                                                                 I5[0][0]                         </span><br><span class="line">                                                                 I6[0][0]                         </span><br><span class="line">                                                                 I7[0][0]                         </span><br><span class="line">                                                                 I8[0][0]                         </span><br><span class="line">                                                                 I9[0][0]                         </span><br><span class="line">                                                                 I10[0][0]                        </span><br><span class="line">                                                                 I11[0][0]                        </span><br><span class="line">                                                                 I12[0][0]                        </span><br><span class="line">                                                                 I13[0][0]                        </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">concatenate_5 (Concatenate)     (None, 104)          0           flatten_52[0][0]                 </span><br><span class="line">                                                                 flatten_53[0][0]                 </span><br><span class="line">                                                                 flatten_54[0][0]                 </span><br><span class="line">                                                                 flatten_55[0][0]                 </span><br><span class="line">                                                                 flatten_56[0][0]                 </span><br><span class="line">                                                                 flatten_57[0][0]                 </span><br><span class="line">                                                                 flatten_58[0][0]                 </span><br><span class="line">                                                                 flatten_59[0][0]                 </span><br><span class="line">                                                                 flatten_60[0][0]                 </span><br><span class="line">                                                                 flatten_61[0][0]                 </span><br><span class="line">                                                                 flatten_62[0][0]                 </span><br><span class="line">                                                                 flatten_63[0][0]                 </span><br><span class="line">                                                                 flatten_64[0][0]                 </span><br><span class="line">                                                                 flatten_65[0][0]                 </span><br><span class="line">                                                                 flatten_66[0][0]                 </span><br><span class="line">                                                                 flatten_67[0][0]                 </span><br><span class="line">                                                                 flatten_68[0][0]                 </span><br><span class="line">                                                                 flatten_69[0][0]                 </span><br><span class="line">                                                                 flatten_70[0][0]                 </span><br><span class="line">                                                                 flatten_71[0][0]                 </span><br><span class="line">                                                                 flatten_72[0][0]                 </span><br><span class="line">                                                                 flatten_73[0][0]                 </span><br><span class="line">                                                                 flatten_74[0][0]                 </span><br><span class="line">                                                                 flatten_75[0][0]                 </span><br><span class="line">                                                                 flatten_76[0][0]                 </span><br><span class="line">                                                                 flatten_77[0][0]                 </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">concatenate_6 (Concatenate)     (None, 117)          0           concatenate_4[0][0]              </span><br><span class="line">                                                                 concatenate_5[0][0]              </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">dense_2 (Dense)                 (None, 1024)         120832      concatenate_6[0][0]              </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">dropout (Dropout)               (None, 1024)         0           dense_2[0][0]                    </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">dense_3 (Dense)                 (None, 512)          524800      dropout[0][0]                    </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">1d_emb_C1 (Embedding)           (None, 1, 1)         28          C1[0][0]                         </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">1d_emb_C2 (Embedding)           (None, 1, 1)         93          C2[0][0]                         </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">1d_emb_C3 (Embedding)           (None, 1, 1)         173         C3[0][0]                         </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">1d_emb_C4 (Embedding)           (None, 1, 1)         158         C4[0][0]                         </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">1d_emb_C5 (Embedding)           (None, 1, 1)         13          C5[0][0]                         </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">1d_emb_C6 (Embedding)           (None, 1, 1)         8           C6[0][0]                         </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">1d_emb_C7 (Embedding)           (None, 1, 1)         184         C7[0][0]                         </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">1d_emb_C8 (Embedding)           (None, 1, 1)         20          C8[0][0]                         </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">1d_emb_C9 (Embedding)           (None, 1, 1)         3           C9[0][0]                         </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">1d_emb_C10 (Embedding)          (None, 1, 1)         143         C10[0][0]                        </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">1d_emb_C11 (Embedding)          (None, 1, 1)         174         C11[0][0]                        </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">1d_emb_C12 (Embedding)          (None, 1, 1)         171         C12[0][0]                        </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">1d_emb_C13 (Embedding)          (None, 1, 1)         167         C13[0][0]                        </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">1d_emb_C14 (Embedding)          (None, 1, 1)         15          C14[0][0]                        </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">1d_emb_C15 (Embedding)          (None, 1, 1)         171         C15[0][0]                        </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">1d_emb_C16 (Embedding)          (None, 1, 1)         169         C16[0][0]                        </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">1d_emb_C17 (Embedding)          (None, 1, 1)         10          C17[0][0]                        </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">1d_emb_C18 (Embedding)          (None, 1, 1)         128         C18[0][0]                        </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">1d_emb_C19 (Embedding)          (None, 1, 1)         45          C19[0][0]                        </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">1d_emb_C20 (Embedding)          (None, 1, 1)         5           C20[0][0]                        </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">1d_emb_C21 (Embedding)          (None, 1, 1)         170         C21[0][0]                        </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">1d_emb_C22 (Embedding)          (None, 1, 1)         7           C22[0][0]                        </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">1d_emb_C23 (Embedding)          (None, 1, 1)         11          C23[0][0]                        </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">1d_emb_C24 (Embedding)          (None, 1, 1)         126         C24[0][0]                        </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">1d_emb_C25 (Embedding)          (None, 1, 1)         21          C25[0][0]                        </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">1d_emb_C26 (Embedding)          (None, 1, 1)         91          C26[0][0]                        </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">dropout_1 (Dropout)             (None, 512)          0           dense_3[0][0]                    </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">concatenate_3 (Concatenate)     (None, 13)           0           I1[0][0]                         </span><br><span class="line">                                                                 I2[0][0]                         </span><br><span class="line">                                                                 I3[0][0]                         </span><br><span class="line">                                                                 I4[0][0]                         </span><br><span class="line">                                                                 I5[0][0]                         </span><br><span class="line">                                                                 I6[0][0]                         </span><br><span class="line">                                                                 I7[0][0]                         </span><br><span class="line">                                                                 I8[0][0]                         </span><br><span class="line">                                                                 I9[0][0]                         </span><br><span class="line">                                                                 I10[0][0]                        </span><br><span class="line">                                                                 I11[0][0]                        </span><br><span class="line">                                                                 I12[0][0]                        </span><br><span class="line">                                                                 I13[0][0]                        </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_26 (Flatten)            (None, 1)            0           1d_emb_C1[0][0]                  </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_27 (Flatten)            (None, 1)            0           1d_emb_C2[0][0]                  </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_28 (Flatten)            (None, 1)            0           1d_emb_C3[0][0]                  </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_29 (Flatten)            (None, 1)            0           1d_emb_C4[0][0]                  </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_30 (Flatten)            (None, 1)            0           1d_emb_C5[0][0]                  </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_31 (Flatten)            (None, 1)            0           1d_emb_C6[0][0]                  </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_32 (Flatten)            (None, 1)            0           1d_emb_C7[0][0]                  </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_33 (Flatten)            (None, 1)            0           1d_emb_C8[0][0]                  </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_34 (Flatten)            (None, 1)            0           1d_emb_C9[0][0]                  </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_35 (Flatten)            (None, 1)            0           1d_emb_C10[0][0]                 </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_36 (Flatten)            (None, 1)            0           1d_emb_C11[0][0]                 </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_37 (Flatten)            (None, 1)            0           1d_emb_C12[0][0]                 </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_38 (Flatten)            (None, 1)            0           1d_emb_C13[0][0]                 </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_39 (Flatten)            (None, 1)            0           1d_emb_C14[0][0]                 </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_40 (Flatten)            (None, 1)            0           1d_emb_C15[0][0]                 </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_41 (Flatten)            (None, 1)            0           1d_emb_C16[0][0]                 </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_42 (Flatten)            (None, 1)            0           1d_emb_C17[0][0]                 </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_43 (Flatten)            (None, 1)            0           1d_emb_C18[0][0]                 </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_44 (Flatten)            (None, 1)            0           1d_emb_C19[0][0]                 </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_45 (Flatten)            (None, 1)            0           1d_emb_C20[0][0]                 </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_46 (Flatten)            (None, 1)            0           1d_emb_C21[0][0]                 </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_47 (Flatten)            (None, 1)            0           1d_emb_C22[0][0]                 </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_48 (Flatten)            (None, 1)            0           1d_emb_C23[0][0]                 </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_49 (Flatten)            (None, 1)            0           1d_emb_C24[0][0]                 </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_50 (Flatten)            (None, 1)            0           1d_emb_C25[0][0]                 </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">flatten_51 (Flatten)            (None, 1)            0           1d_emb_C26[0][0]                 </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">dense_4 (Dense)                 (None, 256)          131328      dropout_1[0][0]                  </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">dense_1 (Dense)                 (None, 1)            14          concatenate_3[0][0]              </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">add (Add)                       (None, 1)            0           flatten_26[0][0]                 </span><br><span class="line">                                                                 flatten_27[0][0]                 </span><br><span class="line">                                                                 flatten_28[0][0]                 </span><br><span class="line">                                                                 flatten_29[0][0]                 </span><br><span class="line">                                                                 flatten_30[0][0]                 </span><br><span class="line">                                                                 flatten_31[0][0]                 </span><br><span class="line">                                                                 flatten_32[0][0]                 </span><br><span class="line">                                                                 flatten_33[0][0]                 </span><br><span class="line">                                                                 flatten_34[0][0]                 </span><br><span class="line">                                                                 flatten_35[0][0]                 </span><br><span class="line">                                                                 flatten_36[0][0]                 </span><br><span class="line">                                                                 flatten_37[0][0]                 </span><br><span class="line">                                                                 flatten_38[0][0]                 </span><br><span class="line">                                                                 flatten_39[0][0]                 </span><br><span class="line">                                                                 flatten_40[0][0]                 </span><br><span class="line">                                                                 flatten_41[0][0]                 </span><br><span class="line">                                                                 flatten_42[0][0]                 </span><br><span class="line">                                                                 flatten_43[0][0]                 </span><br><span class="line">                                                                 flatten_44[0][0]                 </span><br><span class="line">                                                                 flatten_45[0][0]                 </span><br><span class="line">                                                                 flatten_46[0][0]                 </span><br><span class="line">                                                                 flatten_47[0][0]                 </span><br><span class="line">                                                                 flatten_48[0][0]                 </span><br><span class="line">                                                                 flatten_49[0][0]                 </span><br><span class="line">                                                                 flatten_50[0][0]                 </span><br><span class="line">                                                                 flatten_51[0][0]                 </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">dropout_2 (Dropout)             (None, 256)          0           dense_4[0][0]                    </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">add_1 (Add)                     (None, 1)            0           dense_1[0][0]                    </span><br><span class="line">                                                                 add[0][0]                        </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">dense_5 (Dense)                 (None, 1)            257         dropout_2[0][0]                  </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">add_2 (Add)                     (None, 1)            0           add_1[0][0]                      </span><br><span class="line">                                                                 dense_5[0][0]                    </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">activation (Activation)         (None, 1)            0           add_2[0][0]                      </span><br><span class="line">==================================================================================================</span><br><span class="line">Total params: 788,751</span><br><span class="line">Trainable params: 788,751</span><br><span class="line">Non-trainable params: 0</span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">Epoch 1/8</span><br><span class="line">3/3 [==============================] - ETA: 0s - loss: 0.6686 - binary_crossentropy: 0.6686 - auc: 0.660 - 1s 322ms/step - loss: 0.8642 - binary_crossentropy: 0.8642 - auc: 0.5307 - val_loss: 0.9196 - val_binary_crossentropy: 0.9196 - val_auc: 0.6852</span><br><span class="line">Epoch 2/8</span><br><span class="line">3/3 [==============================] - ETA: 0s - loss: 0.6993 - binary_crossentropy: 0.6993 - auc: 0.587 - 0s 33ms/step - loss: 0.7057 - binary_crossentropy: 0.7057 - auc: 0.5780 - val_loss: 0.6952 - val_binary_crossentropy: 0.6952 - val_auc: 0.6667</span><br><span class="line">Epoch 3/8</span><br><span class="line">3/3 [==============================] - ETA: 0s - loss: 0.5635 - binary_crossentropy: 0.5635 - auc: 0.688 - 0s 32ms/step - loss: 0.6362 - binary_crossentropy: 0.6362 - auc: 0.5944 - val_loss: 0.6602 - val_binary_crossentropy: 0.6602 - val_auc: 0.6880</span><br><span class="line">Epoch 4/8</span><br><span class="line">3/3 [==============================] - ETA: 0s - loss: 0.6217 - binary_crossentropy: 0.6217 - auc: 0.591 - 0s 39ms/step - loss: 0.6272 - binary_crossentropy: 0.6272 - auc: 0.5453 - val_loss: 0.6744 - val_binary_crossentropy: 0.6744 - val_auc: 0.7464</span><br><span class="line">Epoch 5/8</span><br><span class="line">3/3 [==============================] - ETA: 0s - loss: 0.5482 - binary_crossentropy: 0.5482 - auc: 0.564 - 0s 34ms/step - loss: 0.5380 - binary_crossentropy: 0.5380 - auc: 0.6284 - val_loss: 0.6426 - val_binary_crossentropy: 0.6426 - val_auc: 0.7265</span><br><span class="line">Epoch 6/8</span><br><span class="line">3/3 [==============================] - ETA: 0s - loss: 0.5465 - binary_crossentropy: 0.5465 - auc: 0.635 - 0s 31ms/step - loss: 0.4800 - binary_crossentropy: 0.4800 - auc: 0.7146 - val_loss: 0.6307 - val_binary_crossentropy: 0.6307 - val_auc: 0.6652</span><br><span class="line">Epoch 7/8</span><br><span class="line">3/3 [==============================] - ETA: 0s - loss: 0.5032 - binary_crossentropy: 0.5032 - auc: 0.699 - 0s 30ms/step - loss: 0.4948 - binary_crossentropy: 0.4948 - auc: 0.6784 - val_loss: 0.6486 - val_binary_crossentropy: 0.6486 - val_auc: 0.6524</span><br><span class="line">Epoch 8/8</span><br><span class="line">3/3 [==============================] - ETA: 0s - loss: 0.4625 - binary_crossentropy: 0.4625 - auc: 0.822 - 0s 36ms/step - loss: 0.4164 - binary_crossentropy: 0.4164 - auc: 0.8191 - val_loss: 0.6470 - val_binary_crossentropy: 0.6470 - val_auc: 0.6595</span><br></pre></td></tr></table></figure>
+<h4 id="参考："><a href="#参考：" class="headerlink" title="参考："></a>参考：</h4><p>1） <a href="https://www.jianshu.com/p/e73146094478" target="_blank" rel="noopener">https://www.jianshu.com/p/e73146094478</a></p>
+<p>2） <a href="https://zhuanlan.zhihu.com/p/57247478" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/57247478</a></p>
+<p>3） 王喆 《深度学习推荐系统》</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+        <div>
+          
+
+        </div>
+      
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Jo Choi</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://caioo0.github.io/2021/03/19/的/" title="深度推荐系统作业：wide&deep介绍和代码实现">http://caioo0.github.io/2021/03/19/的/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明出处！</li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1544796448457&di=de6ca0884fd0f74b7d691576231b193f&imgtype=0&src=http%3A%2F%2Fimgtu.5011.net%2Fuploads%2Fcontent%2F20170303%2F7795981488530133.jpg" alt="Jo Choi">
+            
+              <p class="site-author-name" itemprop="name">Jo Choi</p>
+              <p class="site-description motion-element" itemprop="description">时光不语  静待花开</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">1</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/caioo0" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:cai_oo@sina.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-sina"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#阅读前思考"><span class="nav-number">1.</span> <span class="nav-text">阅读前思考</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#介绍"><span class="nav-number">2.</span> <span class="nav-text">介绍</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Wide-amp-Deep原理"><span class="nav-number">3.</span> <span class="nav-text">Wide &amp; Deep原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Wide部分"><span class="nav-number">3.1.</span> <span class="nav-text">Wide部分</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Deep部分"><span class="nav-number">4.</span> <span class="nav-text">Deep部分</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Wide-amp-Deep联合训练"><span class="nav-number">5.</span> <span class="nav-text">Wide&amp;Deep联合训练</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#代码实现："><span class="nav-number">6.</span> <span class="nav-text">代码实现：</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#参考："><span class="nav-number">6.0.1.</span> <span class="nav-text">参考：</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jo Choi</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.6</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.6"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.6"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.6"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.6"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.6"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  <!-- 代码块复制功能 -->
+  <script type="text/javascript" src="/js/src/clipboard.min.js"></script>
+  <script type="text/javascript" src="/js/src/clipboard-use.js"></script>
+
+  
+
+  <!-- 页面点击小红心 -->
+  <script type="text/javascript" src="/js/src/love.js"></script><!-- hexo-inject:begin --><!-- Begin: Injected MathJax -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config("");
+</script>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+      all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+</script>
+
+<script type="text/javascript" src="">
+</script>
+<!-- End: Injected MathJax -->
+<!-- hexo-inject:end -->
+
+</body>
+</html>
