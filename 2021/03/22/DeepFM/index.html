@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.0.6" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.6">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.6">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.6">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.6" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.6',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="阅读前思考  如果对于FM采用随机梯度下降SGD训练模型参数，请写出模型各个参数的梯度和FM参数训练的复杂度 对于下图(3-1)所示，根据你的理解Sparse Feature中的不同颜色节点分别表示什么意思   背景对于CTR预估的模型来说，一个很重要的点就是学习用户行为对应的特征背后的潜在联系。虽然目前在这个领域已经取得了一些进展（截止2017年），但是目前的做法要么在低维或者高维的特征上存在很">
+<meta name="keywords" content="算法 机器学习  深度学习  强化学习 数据挖掘">
+<meta property="og:type" content="article">
+<meta property="og:title" content="深度学习推荐系统作业：deepFM介绍和代码实现">
+<meta property="og:url" content="http://caioo0.github.io/2021/03/22/DeepFM/index.html">
+<meta property="og:site_name" content="JoChoi&#39;s Blog">
+<meta property="og:description" content="阅读前思考  如果对于FM采用随机梯度下降SGD训练模型参数，请写出模型各个参数的梯度和FM参数训练的复杂度 对于下图(3-1)所示，根据你的理解Sparse Feature中的不同颜色节点分别表示什么意思   背景对于CTR预估的模型来说，一个很重要的点就是学习用户行为对应的特征背后的潜在联系。虽然目前在这个领域已经取得了一些进展（截止2017年），但是目前的做法要么在低维或者高维的特征上存在很">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://ryluo.oss-cn-chengdu.aliyuncs.com/图片image-20210225180556628.png">
+<meta property="og:image" content="http://ryluo.oss-cn-chengdu.aliyuncs.com/图片image-20210225181340313.png">
+<meta property="og:image" content="http://ryluo.oss-cn-chengdu.aliyuncs.com/图片image-20210225181010107.png">
+<meta property="og:updated_time" content="2021-03-22T01:04:01.900Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="深度学习推荐系统作业：deepFM介绍和代码实现">
+<meta name="twitter:description" content="阅读前思考  如果对于FM采用随机梯度下降SGD训练模型参数，请写出模型各个参数的梯度和FM参数训练的复杂度 对于下图(3-1)所示，根据你的理解Sparse Feature中的不同颜色节点分别表示什么意思   背景对于CTR预估的模型来说，一个很重要的点就是学习用户行为对应的特征背后的潜在联系。虽然目前在这个领域已经取得了一些进展（截止2017年），但是目前的做法要么在低维或者高维的特征上存在很">
+<meta name="twitter:image" content="http://ryluo.oss-cn-chengdu.aliyuncs.com/图片image-20210225180556628.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://caioo0.github.io/2021/03/22/DeepFM/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>深度学习推荐系统作业：deepFM介绍和代码实现 | JoChoi's Blog</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+    <a href="https://github.com/caioo0" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewbox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"/><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"/><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"/></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> 
+
+<div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">JoChoi's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Live AI</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+          
+  <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+</li>
+
+      
+
+      
+    </ul>
+  
+
+  
+    
+
+    
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+    
+
+  
+
+
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://caioo0.github.io/2021/03/22/DeepFM/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Jo Choi">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1544796448457&di=de6ca0884fd0f74b7d691576231b193f&imgtype=0&src=http%3A%2F%2Fimgtu.5011.net%2Fuploads%2Fcontent%2F20170303%2F7795981488530133.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="JoChoi's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">深度学习推荐系统作业：deepFM介绍和代码实现</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-03-22T08:59:20+08:00">2021-03-22</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="阅读前思考"><a href="#阅读前思考" class="headerlink" title="阅读前思考"></a>阅读前思考</h2><blockquote>
+<ol>
+<li>如果对于FM采用随机梯度下降SGD训练模型参数，请写出模型各个参数的梯度和FM参数训练的复杂度</li>
+<li>对于下图(3-1)所示，根据你的理解Sparse Feature中的不同颜色节点分别表示什么意思</li>
+</ol>
+</blockquote>
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>对于CTR预估的模型来说，一个很重要的点就是学习用户行为对应的特征背后的潜在联系。虽然目前在这个领域已经取得了一些进展（截止2017年），但是目前的做法要么在低维或者高维的特征上存在很大的偏差，要么需要大量的专家级的特征工程。</p>
+<p>哈工大和华为联合设计了一种新的模型DeepFM，从而找到了一种可能性，可以同时提升低维和高维的特征。它结合了FM和神经网络模型的长处，和Google最新的Wide &amp; Deep模型的做法相比，取得了更大的进步，并且还免去了特征工程的部分。<br>论文详见：<a href="https://arxiv.org/abs/1703.04247" target="_blank" rel="noopener">A Factorization-Machine based Neural Network for CTR Prediction</a></p>
+<h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p><strong>DeepFM模型本质</strong></p>
+<ol>
+<li>将Wide &amp; Deep 部分的wide部分由 人工特征工程+LR 转换为FM模型，避开了人工特征工程；</li>
+<li>FM模型与deep part共享feature embedding。</li>
+</ol>
+<p><strong>为什么要用FM代替线性部分（wide）呢？</strong></p>
+<p>因为线性模型有个致命的缺点：无法提取高阶的组合特征。<br>FM通过隐向量latent vector做内积来表示组合特征，从理论上解决了低阶和高阶组合特征提取的问题。但是实际应用中受限于计算复杂度，一般也就只考虑到2阶交叉特征。</p>
+<p><strong>各模型间的对比</strong> </p>
+<ol>
+<li>随着DNN在图像、语音、NLP等领域取得突破，人们意识到DNN在特征表示上的天然优势。相继提出了使用CNN或RNN来做CTR预估的模型,但是</li>
+</ol>
+<blockquote>
+<p>CNN模型缺点：偏向于学习相邻特征的组合特征。<br>RNN模型缺点：比较适用于有序列(时序)关系的数据。</p>
+</blockquote>
+<ol>
+<li>FNN (Factorization-machine supported Neural Network) 的提出，应该算是一次非常不错的尝试：先使用预先训练好的FM，得到隐向量，然后作为DNN的输入来训练模型。缺点在于：受限于FM预训练的效果。</li>
+<li>PNN (Product-based Neural Network)，PNN为了捕获高阶组合特征，在embedding layer和first hidden layer之间增加了一个product layer。根据product layer使用内积、外积、混合分别衍生出IPNN, OPNN, PNN*三种类型。</li>
+</ol>
+<p>无论是FNN还是PNN，他们都有一个绕不过去的缺点：<strong>对于低阶的组合特征，学习到的比较少。</strong>而前面我们说过，低阶特征对于CTR也是非常重要的。</p>
+<ol>
+<li>为了同时学习低阶和高阶组合特征，Google提出了Wide&amp;Deep模型。它混合了一个线性模型（Wide part）和Deep模型(Deep part)。这两部分模型需要不同的输入，而Wide part部分的输入，依旧依赖人工特征工程。</li>
+</ol>
+<p><strong>DeepFM优势</strong> </p>
+<p>上面这些模型普遍都存在两个问题：</p>
+<ol>
+<li>偏向于提取低阶或者高阶的组合特征。</li>
+<li>不能同时提取这两种类型的特征。</li>
+<li>需要专业的领域知识来做特征工程。</li>
+</ol>
+<p>DeepFM可以看做是从FM基础上衍生的算法，将Deep与FM相结合，用FM做特征间低阶组合，用Deep NN部分做特征间高阶组合，通过并行的方式组合两种方法，使得最终的架构具有以下特点。</p>
+<ol>
+<li>不需要预训练 FM 得到隐向量；</li>
+<li>不需要人工特征工程；</li>
+<li>能同时学习低阶和高阶的组合特征；</li>
+<li>FM 模块和 Deep 模块共享 Feature Embedding 部分，可以更快的训练，以及更精确的训练学习。</li>
+</ol>
+<p>————————————————</p>
+<h2 id="DeepFM模型介绍"><a href="#DeepFM模型介绍" class="headerlink" title="DeepFM模型介绍"></a>DeepFM模型介绍</h2><h4 id="DeepFM的模型结构："><a href="#DeepFM的模型结构：" class="headerlink" title="DeepFM的模型结构："></a>DeepFM的模型结构：</h4><p><img src="http://ryluo.oss-cn-chengdu.aliyuncs.com/图片image-20210225180556628.png" alt="image-20210225180556628" style="zoom:50%;"></p>
+<p>DeepFM包含两部分：神经网络部分与因子分解机部分，分别负责低阶特征的提取和高阶特征的提取。这两部分共享同样的输入。DeepFM的预测结果可以写为：$$\hat{y}=sigmoid(y_{fm} + y_{dnn})$$</p>
+<h3 id="FM部分"><a href="#FM部分" class="headerlink" title="FM部分"></a>FM部分</h3><p>详细内容参考FM模型部分的内容，下图是FM的一个结构图，从图中大致可以看出FM Layer是由一阶特征和二阶特征Concatenate到一起在经过一个Sigmoid得到logits（结合FM的公式一起看），所以在实现的时候需要单独考虑linear部分和FM交叉特征部分。<br>$$\hat{y}_{FM}(x) = w_0+\sum_{i=1}^N w_ix_i + \sum_{i=1}^N \sum_{j=i+1}^N v_i^T v_j x_ix_j$$<br><img src="http://ryluo.oss-cn-chengdu.aliyuncs.com/图片image-20210225181340313.png" alt="image-20210225181340313" style="zoom: 67%;"></p>
+<h3 id="Deep部分"><a href="#Deep部分" class="headerlink" title="Deep部分"></a>Deep部分</h3><p>Deep架构图</p>
+<p><img src="http://ryluo.oss-cn-chengdu.aliyuncs.com/图片image-20210225181010107.png" alt="image-20210225181010107" style="zoom:50%;"></p>
+<p>Deep Module是为了学习高阶的特征组合，在上图中使用用全连接的方式将Dense Embedding输入到Hidden Layer，这里面Dense Embeddings就是为了解决DNN中的参数爆炸问题，这也是推荐模型中常用的处理方法。</p>
+<p>Embedding层的输出是将所有id类特征对应的embedding向量concat到到一起输入到DNN中。其中$v_i$表示第i个field的embedding，m是field的数量。<br>$$z_1=[v_1, v_2, …, v_m]$$<br>上一层的输出作为下一层的输入，我们得到：<br>$$z_L=\sigma(W_{L-1} z_{L-1}+b_{L-1})$$<br>其中$\sigma$表示激活函数，$z, W, b $分别表示该层的输入、权重和偏置。</p>
+<p>最后进入DNN部分输出使用sigmod激活函数进行激活：</p>
+<h3 id="代码实现："><a href="#代码实现：" class="headerlink" title="代码实现："></a>代码实现：</h3><p>完整数据集:<a href="https://labs.criteo.com/2014/02/download-kaggle-display-advertising-challenge-dataset/" target="_blank" rel="noopener">crite</a></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding=utf-8</span></span><br><span class="line"><span class="comment"># Author:Jo Choi</span></span><br><span class="line"><span class="comment"># Date:2021-03-21</span></span><br><span class="line"><span class="comment"># Email:cai_oo@sina.com.cn</span></span><br><span class="line"><span class="comment"># Blog: caioo0.github.io</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">数据集：criteo_sample</span></span><br><span class="line"><span class="string">------------------------------</span></span><br><span class="line"><span class="string">运行结果：</span></span><br><span class="line"><span class="string">----------------------------</span></span><br><span class="line"><span class="string">ETA: 0s - loss: 0.6558 - binary_crossentropy: 0.6558 - auc: 0.569 - 0s 28ms/step - loss: 0.6664 - binary_crossentropy: 0.6664 - </span></span><br><span class="line"><span class="string">auc: 0.6306 - val_loss: 0.7323 - val_binary_crossentropy: 0.7323 - val_auc: 0.6724</span></span><br><span class="line"><span class="string">----------------------------</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="keyword">import</span> warnings</span><br><span class="line">warnings.filterwarnings(<span class="string">"ignore"</span>)</span><br><span class="line"><span class="keyword">import</span> itertools</span><br><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np </span><br><span class="line"><span class="keyword">from</span> tqdm <span class="keyword">import</span> tqdm</span><br><span class="line"><span class="keyword">from</span> collections <span class="keyword">import</span> namedtuple</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"><span class="keyword">from</span> tensorflow.keras.layers <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">from</span> tensorflow.keras.models <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> sklearn.model_selection <span class="keyword">import</span> train_test_split</span><br><span class="line"><span class="keyword">from</span> sklearn.preprocessing <span class="keyword">import</span> MinMaxScaler,LabelEncoder</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> utils <span class="keyword">import</span> SparseFeat, DenseFeat, VarLenSparseFeat</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">data_process</span><span class="params">(data_df,dense_features,sparse_features)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    数据预处理，包括填充缺失值，数值处理，类别编码</span></span><br><span class="line"><span class="string">    :param data_df: Data_Frame格式的数据</span></span><br><span class="line"><span class="string">    :param dense_features: 数值特征名称列表</span></span><br><span class="line"><span class="string">    :param sparse_features: 离散特征名称列表</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">     <span class="comment">#数值型特征缺失值填充0.0</span></span><br><span class="line">    data_df[dense_features] = data_df[dense_features].fillna(<span class="number">0.0</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> f <span class="keyword">in</span> dense_features:</span><br><span class="line">        data_df[f] = data_df[f].apply(<span class="keyword">lambda</span> x: np.log(x + <span class="number">1</span>) <span class="keyword">if</span> x &gt; <span class="number">-1</span> <span class="keyword">else</span> <span class="number">-1</span>)</span><br><span class="line">     </span><br><span class="line">    <span class="comment">#离散型特征缺失值填充-1   </span></span><br><span class="line">    data_df[sparse_features] = data_df[sparse_features].fillna(<span class="string">"-1"</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> f <span class="keyword">in</span> sparse_features:</span><br><span class="line">        <span class="comment">#标准化</span></span><br><span class="line">        lbe = LabelEncoder()</span><br><span class="line">        data_df[f] = lbe.fit_transform(data_df[f])</span><br><span class="line">    </span><br><span class="line">    <span class="comment">#返回    </span></span><br><span class="line">    <span class="keyword">return</span> data_df[dense_features + sparse_features]</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">build_input_layers</span><span class="params">(feature_columns)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    构建输入层</span></span><br><span class="line"><span class="string">    :param feature_columns : 数据集中的所有特征对应的特征标记</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 构建input 层字典，并以dense 和 sparse 两类字典的形式返回</span></span><br><span class="line">    dense_input_dict,sparse_input_dict = &#123;&#125; ,&#123;&#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> fc <span class="keyword">in</span> feature_columns:</span><br><span class="line">        <span class="keyword">if</span> isinstance(fc,SparseFeat):</span><br><span class="line">            sparse_input_dict[fc.name] = Input(shape = (<span class="number">1</span>,), name = fc.name)</span><br><span class="line">        <span class="keyword">elif</span> isinstance(fc,DenseFeat):</span><br><span class="line">            dense_input_dict[fc.name] = Input(shape = (fc.dimension, ), name = fc.name)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> dense_input_dict, sparse_input_dict</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">build_embedding_layers</span><span class="params">(feature_columns, input_layers_dict, is_linear)</span>:</span></span><br><span class="line">    <span class="comment"># 定义一个embedding层对应的字典</span></span><br><span class="line">    embedding_layers_dict = dict()</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 将特征中的sparse特征筛选出来</span></span><br><span class="line">    sparse_feature_columns = list(filter(<span class="keyword">lambda</span> x: isinstance(x, SparseFeat), feature_columns)) <span class="keyword">if</span> feature_columns <span class="keyword">else</span> []</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 如果是用于线性部分的embedding层，其维度为1，否则维度就是自己定义的embedding维度</span></span><br><span class="line">    <span class="keyword">if</span> is_linear:</span><br><span class="line">        <span class="keyword">for</span> fc <span class="keyword">in</span> sparse_feature_columns:</span><br><span class="line">            embedding_layers_dict[fc.name] = Embedding(fc.vocabulary_size , <span class="number">1</span>, name = <span class="string">'1d_emb_'</span> + fc.name)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">for</span> fc <span class="keyword">in</span> sparse_feature_columns:</span><br><span class="line">            embedding_layers_dict[fc.name] = Embedding(fc.vocabulary_size , fc.embedding_dim , name = <span class="string">'kd_emb_'</span> + fc.name) </span><br><span class="line">            </span><br><span class="line">    <span class="keyword">return</span> embedding_layers_dict </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_linear_logits</span><span class="params">(dense_input_dict, sparse_input_dict, sparse_feature_columns)</span>:</span></span><br><span class="line">    <span class="comment"># 将所有的dense特征的Input层，然后经过一个全连接层得到dense特征的logits</span></span><br><span class="line">    concat_dense_inputs = Concatenate(axis=<span class="number">1</span>)(list(dense_input_dict.values()))</span><br><span class="line">    dense_logits_output = Dense(<span class="number">1</span>)(concat_dense_inputs)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 获取linear部分sparse特征的embedding层，这里使用embedding的原因是：</span></span><br><span class="line">    <span class="comment"># 对于linear部分直接将特征进行onehot然后通过一个全连接层，当维度特别大的时候，计算比较慢</span></span><br><span class="line">    <span class="comment"># 使用embedding层的好处就是可以通过查表的方式获取到哪些非零的元素对应的权重，然后在将这些权重相加，效率比较高</span></span><br><span class="line">    linear_embedding_layers = build_embedding_layers(sparse_feature_columns, sparse_input_dict, is_linear=<span class="keyword">True</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 将一维的embedding拼接，注意这里需要使用一个Flatten层，使维度对应</span></span><br><span class="line">    sparse_1d_embed = []</span><br><span class="line">    <span class="keyword">for</span> fc <span class="keyword">in</span> sparse_feature_columns:</span><br><span class="line">        feat_input = sparse_input_dict[fc.name]</span><br><span class="line">        embed = Flatten()(linear_embedding_layers[fc.name](feat_input)) <span class="comment"># B x 1</span></span><br><span class="line">        sparse_1d_embed.append(embed)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># embedding中查询得到的权重就是对应onehot向量中一个位置的权重，所以后面不用再接一个全连接了，本身一维的embedding就相当于全连接</span></span><br><span class="line">    <span class="comment"># 只不过是这里的输入特征只有0和1，所以直接向非零元素对应的权重相加就等同于进行了全连接操作(非零元素部分乘的是1)</span></span><br><span class="line">    sparse_logits_output = Add()(sparse_1d_embed)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 最终将dense特征和sparse特征对应的logits相加，得到最终linear的logits</span></span><br><span class="line">    linear_logits = Add()([dense_logits_output, sparse_logits_output])</span><br><span class="line">    <span class="keyword">return</span> linear_logits</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">FM_Layer</span><span class="params">(Layer)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self)</span>:</span></span><br><span class="line">        super(FM_Layer, self).__init__()</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">call</span><span class="params">(self, inputs)</span>:</span></span><br><span class="line">        <span class="string">"""</span></span><br><span class="line"><span class="string">        优化后的公式： 0.5 * 求和（和的平方 - 平方的和）  =&gt;&gt; B x 1</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        <span class="comment"># B x n x K </span></span><br><span class="line">        concated_embeds_value = inputs </span><br><span class="line">        </span><br><span class="line">        <span class="comment"># B x 1 x k </span></span><br><span class="line">        square_of_sum = tf.square(tf.reduce_sum(concated_embeds_value, axis = <span class="number">1</span>,keepdims = <span class="keyword">True</span> ))</span><br><span class="line">        sum_of_square = tf.reduce_sum(concated_embeds_value * concated_embeds_value, axis = <span class="number">1</span>,keepdims = <span class="keyword">True</span>)</span><br><span class="line">        cross_term = square_of_sum - sum_of_square </span><br><span class="line">        <span class="comment"># B x 1</span></span><br><span class="line">        cross_term = <span class="number">0.5</span> * tf.reduce_sum(cross_term, axis = <span class="number">2</span> ,keepdims = <span class="keyword">False</span>) </span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> cross_term</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">compute_output_shape</span><span class="params">(self, input_shape)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> (<span class="keyword">None</span>, <span class="number">1</span>)</span><br><span class="line">    </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_fm_logits</span><span class="params">(sparse_input_dict, sparse_feature_columns, dnn_embedding_layers)</span>:</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 讲特征中的squarse特征筛选出来</span></span><br><span class="line">    sqarse_feature_columns = list(filter(<span class="keyword">lambda</span> x: isinstance(x, SparseFeat), sparse_feature_columns))</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 只考虑sparse的二阶交叉，将所有的embedding拼接到一起进行FM计算</span></span><br><span class="line">    <span class="comment"># 因为类别型数据输入的只有0和1所以不需要考虑将隐向量与X相乘， 直接对隐向量进行操作即可</span></span><br><span class="line">    sparse_kd_embed = []</span><br><span class="line">    <span class="keyword">for</span> fc <span class="keyword">in</span> sparse_feature_columns:</span><br><span class="line">        feat_input = sparse_input_dict[fc.name]</span><br><span class="line">        _embed = dnn_embedding_layers[fc.name](feat_input) <span class="comment"># B x 1 x k</span></span><br><span class="line">        sparse_kd_embed.append(_embed)</span><br><span class="line">        </span><br><span class="line">    <span class="comment"># 将所有sparse的embedding拼接起来，得到( n, k)的矩阵， 其中n为特征数，k为embedding大小</span></span><br><span class="line">    <span class="comment"># B x n x k</span></span><br><span class="line">    concat_sparse_kd_embed = Concatenate(axis = <span class="number">1</span>)(sparse_kd_embed) </span><br><span class="line">    fm_cross_out = FM_Layer()(concat_sparse_kd_embed)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> fm_cross_out </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_dnn_logits</span><span class="params">(sparse_input_dict, sparse_feature_columns, dnn_embedding_layers)</span>:</span></span><br><span class="line">    <span class="comment"># 将特征中的sparse特征筛选出来</span></span><br><span class="line">    sparse_feature_columns = list(filter(<span class="keyword">lambda</span> x: isinstance(x, SparseFeat), sparse_feature_columns))</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 将所有非零的sparse特征对应的embedding拼接到一起</span></span><br><span class="line">    sparse_kd_embed = []</span><br><span class="line">    <span class="keyword">for</span> fc <span class="keyword">in</span> sparse_feature_columns:</span><br><span class="line">        feat_input = sparse_input_dict[fc.name]</span><br><span class="line">        _embed = dnn_embedding_layers[fc.name](feat_input) <span class="comment"># B x 1 x k</span></span><br><span class="line">        _embed = Flatten()(_embed) <span class="comment"># B x k</span></span><br><span class="line">        sparse_kd_embed.append(_embed)</span><br><span class="line"></span><br><span class="line">    concat_sparse_kd_embed = Concatenate(axis=<span class="number">1</span>)(sparse_kd_embed) <span class="comment"># B x nk   </span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># dnn层，这里的Dropout参数，Dense中的参数都可以自己设定，以及Dense的层数都可以自行设定</span></span><br><span class="line">    mlp_out = Dropout(<span class="number">0.5</span>)(Dense(<span class="number">256</span>, activation=<span class="string">'relu'</span>)(concat_sparse_kd_embed))  </span><br><span class="line">    mlp_out = Dropout(<span class="number">0.3</span>)(Dense(<span class="number">256</span>, activation=<span class="string">'relu'</span>)(mlp_out))</span><br><span class="line">    mlp_out = Dropout(<span class="number">0.1</span>)(Dense(<span class="number">256</span>, activation=<span class="string">'relu'</span>)(mlp_out))</span><br><span class="line"></span><br><span class="line">    dnn_out = Dense(<span class="number">1</span>)(mlp_out)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> dnn_out</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">DeepFM</span><span class="params">(linear_feature_columns, dnn_feature_columns)</span>:</span></span><br><span class="line">    <span class="comment"># 构建输入层，即所有特征对应的Input()层，这里使用字典的形式返回，方便后续构建模型</span></span><br><span class="line">    dense_input_dict, sparse_input_dict = build_input_layers(linear_feature_columns + dnn_feature_columns)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 将linear部分的特征中sparse特征筛选出来，后面用来做1维的embedding</span></span><br><span class="line">    linear_sparse_feature_columns = list(filter(<span class="keyword">lambda</span> x: isinstance(x, SparseFeat), linear_feature_columns))</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 构建模型的输入层，模型的输入层不能是字典的形式，应该将字典的形式转换成列表的形式</span></span><br><span class="line">    <span class="comment"># 注意：这里实际的输入与Input()层的对应，是通过模型输入时候的字典数据的key与对应name的Input层</span></span><br><span class="line">    input_layers = list(dense_input_dict.values()) + list(sparse_input_dict.values())</span><br><span class="line"></span><br><span class="line">    <span class="comment"># linear_logits由两部分组成，分别是dense特征的logits和sparse特征的logits</span></span><br><span class="line">    linear_logits = get_linear_logits(dense_input_dict, sparse_input_dict, linear_sparse_feature_columns)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 构建维度为k的embedding层，这里使用字典的形式返回，方便后面搭建模型</span></span><br><span class="line">    <span class="comment"># embedding层用户构建FM交叉部分和DNN的输入部分</span></span><br><span class="line">    embedding_layers = build_embedding_layers(dnn_feature_columns, sparse_input_dict, is_linear=<span class="keyword">False</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 将输入到dnn中的所有sparse特征筛选出来</span></span><br><span class="line">    dnn_sparse_feature_columns = list(filter(<span class="keyword">lambda</span> x: isinstance(x, SparseFeat), dnn_feature_columns))</span><br><span class="line"></span><br><span class="line">    fm_logits = get_fm_logits(sparse_input_dict, dnn_sparse_feature_columns, embedding_layers) <span class="comment"># 只考虑二阶项</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 将所有的Embedding都拼起来，一起输入到dnn中</span></span><br><span class="line">    dnn_logits = get_dnn_logits(sparse_input_dict, dnn_sparse_feature_columns, embedding_layers)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 将linear,FM,dnn的logits相加作为最终的logits</span></span><br><span class="line">    output_logits = Add()([linear_logits, fm_logits, dnn_logits])</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 这里的激活函数使用sigmoid</span></span><br><span class="line">    output_layers = Activation(<span class="string">"sigmoid"</span>)(output_logits)</span><br><span class="line"></span><br><span class="line">    model = Model(input_layers, output_layers)</span><br><span class="line">    <span class="keyword">return</span> model</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:</span><br><span class="line">    <span class="comment"># 读取数据</span></span><br><span class="line">    data = pd.read_csv(<span class="string">'./data/criteo_sample.txt'</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 划分dense和sparse特征</span></span><br><span class="line">    columns = data.columns.values</span><br><span class="line">    dense_features = [feat <span class="keyword">for</span> feat <span class="keyword">in</span> columns <span class="keyword">if</span> <span class="string">'I'</span> <span class="keyword">in</span> feat]</span><br><span class="line">    sparse_features = [feat <span class="keyword">for</span> feat <span class="keyword">in</span> columns <span class="keyword">if</span> <span class="string">'C'</span> <span class="keyword">in</span> feat]</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 简单的数据预处理</span></span><br><span class="line">    train_data = data_process(data, dense_features, sparse_features)</span><br><span class="line">    train_data[<span class="string">'label'</span>] = data[<span class="string">'label'</span>]</span><br><span class="line">    </span><br><span class="line">  <span class="comment"># 将特征分组，分成linear部分和dnn部分(根据实际场景进行选择)，并将分组之后的特征做标记（使用DenseFeat, SparseFeat）</span></span><br><span class="line">    linear_feature_columns = [SparseFeat(feat, vocabulary_size=data[feat].nunique(),embedding_dim=<span class="number">4</span>)</span><br><span class="line">                            <span class="keyword">for</span> i,feat <span class="keyword">in</span> enumerate(sparse_features)] + [DenseFeat(feat, <span class="number">1</span>,)</span><br><span class="line">                            <span class="keyword">for</span> feat <span class="keyword">in</span> dense_features]</span><br><span class="line"></span><br><span class="line">    dnn_feature_columns = [SparseFeat(feat, vocabulary_size=data[feat].nunique(),embedding_dim=<span class="number">4</span>)</span><br><span class="line">                            <span class="keyword">for</span> i,feat <span class="keyword">in</span> enumerate(sparse_features)] + [DenseFeat(feat, <span class="number">1</span>,)</span><br><span class="line">                            <span class="keyword">for</span> feat <span class="keyword">in</span> dense_features]</span><br><span class="line"></span><br><span class="line">   <span class="comment"># 构建DeepFM模型</span></span><br><span class="line">    history = DeepFM(linear_feature_columns, dnn_feature_columns)</span><br><span class="line">    history.summary()</span><br><span class="line">    history.compile(optimizer=<span class="string">"adam"</span>, </span><br><span class="line">                loss=<span class="string">"binary_crossentropy"</span>, </span><br><span class="line">                metrics=[<span class="string">"binary_crossentropy"</span>, tf.keras.metrics.AUC(name=<span class="string">'auc'</span>)])</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 将输入数据转化成字典的形式输入</span></span><br><span class="line">    train_model_input = &#123;name: data[name] <span class="keyword">for</span> name <span class="keyword">in</span> dense_features + sparse_features&#125;</span><br><span class="line">    <span class="comment"># 模型训练</span></span><br><span class="line">    history.fit(train_model_input, train_data[<span class="string">'label'</span>].values,</span><br><span class="line">            batch_size=<span class="number">64</span>, epochs=<span class="number">8</span>, validation_split=<span class="number">0.2</span>, )</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">dropout_2 (Dropout)             (None, 256)          0           dense_4[0][0]                    </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">add_3 (Add)                     (None, 1)            0           dense_1[0][0]                    </span><br><span class="line">                                                                 add_2[0][0]                      </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">fm__layer (FM_Layer)            (None, 1)            0           concatenate_2[0][0]              </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">dense_5 (Dense)                 (None, 1)            257         dropout_2[0][0]                  </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">add_4 (Add)                     (None, 1)            0           add_3[0][0]                      </span><br><span class="line">                                                                 fm__layer[0][0]                  </span><br><span class="line">                                                                 dense_5[0][0]                    </span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">activation (Activation)         (None, 1)            0           add_4[0][0]                      </span><br><span class="line">==================================================================================================</span><br><span class="line">Total params: 170,125</span><br><span class="line">Trainable params: 170,125</span><br><span class="line">Non-trainable params: 0</span><br><span class="line">__________________________________________________________________________________________________</span><br><span class="line">Epoch 1/8</span><br><span class="line">3/3 [==============================] - ETA: 0s - loss: 0.8385 - binary_crossentropy: 0.8385 - auc: 0.453 - 1s 332ms/step - loss: 1.0251 - binary_crossentropy: 1.0251 - auc: 0.5025 - val_loss: 1.1393 - val_binary_crossentropy: 1.1393 - val_auc: 0.6481</span><br><span class="line">Epoch 2/8</span><br><span class="line">3/3 [==============================] - ETA: 0s - loss: 0.9249 - binary_crossentropy: 0.9249 - auc: 0.445 - 0s 26ms/step - loss: 0.9782 - binary_crossentropy: 0.9782 - auc: 0.5065 - val_loss: 1.0822 - val_binary_crossentropy: 1.0822 - val_auc: 0.6368</span><br><span class="line">Epoch 3/8</span><br><span class="line">3/3 [==============================] - ETA: 0s - loss: 0.6185 - binary_crossentropy: 0.6185 - auc: 0.608 - 0s 28ms/step - loss: 0.9260 - binary_crossentropy: 0.9260 - auc: 0.5326 - val_loss: 1.0137 - val_binary_crossentropy: 1.0137 - val_auc: 0.6453</span><br><span class="line">Epoch 4/8</span><br><span class="line">3/3 [==============================] - ETA: 0s - loss: 0.7218 - binary_crossentropy: 0.7218 - auc: 0.606 - 0s 29ms/step - loss: 0.8665 - binary_crossentropy: 0.8665 - auc: 0.5416 - val_loss: 0.9309 - val_binary_crossentropy: 0.9309 - val_auc: 0.6467</span><br><span class="line">Epoch 5/8</span><br><span class="line">3/3 [==============================] - ETA: 0s - loss: 0.4631 - binary_crossentropy: 0.4631 - auc: 0.700 - 0s 24ms/step - loss: 0.7977 - binary_crossentropy: 0.7977 - auc: 0.5513 - val_loss: 0.8414 - val_binary_crossentropy: 0.8414 - val_auc: 0.6496</span><br><span class="line">Epoch 6/8</span><br><span class="line">3/3 [==============================] - ETA: 0s - loss: 0.9847 - binary_crossentropy: 0.9847 - auc: 0.415 - 0s 23ms/step - loss: 0.7581 - binary_crossentropy: 0.7581 - auc: 0.5584 - val_loss: 0.7629 - val_binary_crossentropy: 0.7629 - val_auc: 0.6581</span><br><span class="line">Epoch 7/8</span><br><span class="line">3/3 [==============================] - ETA: 0s - loss: 0.7810 - binary_crossentropy: 0.7810 - auc: 0.591 - 0s 23ms/step - loss: 0.6955 - binary_crossentropy: 0.6955 - auc: 0.5933 - val_loss: 0.7338 - val_binary_crossentropy: 0.7338 - val_auc: 0.6681</span><br><span class="line">Epoch 8/8</span><br><span class="line">3/3 [==============================] - ETA: 0s - loss: 0.6558 - binary_crossentropy: 0.6558 - auc: 0.569 - 0s 28ms/step - loss: 0.6664 - binary_crossentropy: 0.6664 - auc: 0.6306 - val_loss: 0.7323 - val_binary_crossentropy: 0.7323 - val_auc: 0.6724</span><br></pre></td></tr></table></figure>
+<h3 id="思考题解答"><a href="#思考题解答" class="headerlink" title="思考题解答"></a>思考题解答</h3><p><strong>1. 如果对于FM采用随机梯度下降SGD训练模型参数，请写出模型各个参数的梯度和FM参数训练的复杂度？</strong></p>
+<p><strong>解答：</strong></p>
+<p><strong>2. 对于下图(3-1)所示，根据你的理解Sparse Feature中的不同颜色节点分别表示什么意思?</strong> </p>
+<p><strong>解答：</strong> </p>
+<p>一个圆点是一个神经元 ，每个field只有一个神经元标记为黄色，可以记作1，其他记作0，field到embedding voctor的过程中只有黄色（1）这个是起作用的。可以理解为 embedding voctor （嵌入向量的具体值）是该神经元（标记为黄色）相连的5条线的权重。我也是这么理解的。</p>
+<h2 id="参考："><a href="#参考：" class="headerlink" title="参考："></a>参考：</h2><ol>
+<li><a href="https://blog.csdn.net/maqunfi/article/details/99635620" target="_blank" rel="noopener">https://blog.csdn.net/maqunfi/article/details/99635620</a></li>
+<li><a href="https://blog.csdn.net/weixin_45459911/article/details/105359982" target="_blank" rel="noopener">https://blog.csdn.net/weixin_45459911/article/details/105359982</a></li>
+<li>王喆 《深度学习推荐系统》</li>
+</ol>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+        <div>
+          
+
+        </div>
+      
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Jo Choi</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://caioo0.github.io/2021/03/22/DeepFM/" title="深度学习推荐系统作业：deepFM介绍和代码实现">http://caioo0.github.io/2021/03/22/DeepFM/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明出处！</li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/03/19/的/" rel="next" title="深度推荐系统作业：wide&deep介绍和代码实现">
+                <i class="fa fa-chevron-left"></i> 深度推荐系统作业：wide&deep介绍和代码实现
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1544796448457&di=de6ca0884fd0f74b7d691576231b193f&imgtype=0&src=http%3A%2F%2Fimgtu.5011.net%2Fuploads%2Fcontent%2F20170303%2F7795981488530133.jpg" alt="Jo Choi">
+            
+              <p class="site-author-name" itemprop="name">Jo Choi</p>
+              <p class="site-description motion-element" itemprop="description">时光不语  静待花开</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">2</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/caioo0" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:cai_oo@sina.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-sina"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#阅读前思考"><span class="nav-number">1.</span> <span class="nav-text">阅读前思考</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#背景"><span class="nav-number">2.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#介绍"><span class="nav-number">3.</span> <span class="nav-text">介绍</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DeepFM模型介绍"><span class="nav-number">4.</span> <span class="nav-text">DeepFM模型介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#DeepFM的模型结构："><span class="nav-number">4.0.1.</span> <span class="nav-text">DeepFM的模型结构：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#FM部分"><span class="nav-number">4.1.</span> <span class="nav-text">FM部分</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Deep部分"><span class="nav-number">4.2.</span> <span class="nav-text">Deep部分</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#代码实现："><span class="nav-number">4.3.</span> <span class="nav-text">代码实现：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#思考题解答"><span class="nav-number">4.4.</span> <span class="nav-text">思考题解答</span></a></li></ol><li class="nav-item nav-level-2"><a class="nav-link" href="#参考："><span class="nav-number">5.</span> <span class="nav-text">参考：</span></a></li></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jo Choi</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.6</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.6"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.6"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.6"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.6"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.6"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  <!-- 代码块复制功能 -->
+  <script type="text/javascript" src="/js/src/clipboard.min.js"></script>
+  <script type="text/javascript" src="/js/src/clipboard-use.js"></script>
+
+  
+
+  <!-- 页面点击小红心 -->
+  <script type="text/javascript" src="/js/src/love.js"></script><!-- hexo-inject:begin --><!-- Begin: Injected MathJax -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config("");
+</script>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+      all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+</script>
+
+<script type="text/javascript" src="">
+</script>
+<!-- End: Injected MathJax -->
+<!-- hexo-inject:end -->
+
+</body>
+</html>
